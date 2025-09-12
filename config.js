@@ -94,7 +94,7 @@ const websiteConfig = {
   ],
 
   // 技能列表（首页终端显示）
-  skills: ["Java", "JavaScript", "Python", "React", "Node.js", "DevOps"],
+  skills: ["Java", "Python", "NodeJs", "DevOps","Web逆向"],
 
   // 详细技能评分
   skillsDetail: {

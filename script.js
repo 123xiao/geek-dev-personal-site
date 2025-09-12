@@ -36,6 +36,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // 加载GitHub置顶项目
   loadGitHubPinnedRepos();
+
+  // 获取访客地理位置信息
+  fetchVisitorLocation();
 });
 
 /**
@@ -1063,4 +1066,192 @@ function formatNumber(num) {
     return (num / 1000).toFixed(1) + "k";
   }
   return num.toString();
+}
+
+/**
+ * 获取访客地理位置信息
+ */
+async function fetchVisitorLocation() {
+  try {
+    const response = await fetch('https://qifu-api.baidubce.com/ip/local/geo/v1/district');
+    const data = await response.json();
+    
+    if (data.code === 'Success' && data.data) {
+      displayWelcomeMessage(data.data, data.ip);
+    }
+  } catch (error) {
+    console.log('获取地理位置信息失败:', error);
+    // 显示默认欢迎信息
+    displayWelcomeMessage(null, null);
+  }
+}
+
+/**
+ * 显示欢迎访客信息
+ */
+function displayWelcomeMessage(locationData, ip) {
+  // 创建欢迎信息容器
+  const welcomeContainer = document.createElement('div');
+  welcomeContainer.id = 'visitor-welcome';
+  welcomeContainer.style.cssText = `
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: rgba(0, 0, 0, 0.9);
+    color: var(--primary-color);
+    padding: 15px 20px;
+    border-radius: 8px;
+    border: 1px solid var(--primary-color);
+    font-family: var(--font-mono);
+    font-size: 14px;
+    z-index: 1000;
+    max-width: 300px;
+    box-shadow: 0 4px 20px rgba(0, 255, 136, 0.3);
+    animation: slideInRight 0.5s ease-out;
+    backdrop-filter: blur(10px);
+  `;
+
+  let welcomeText = '';
+  
+  if (locationData) {
+    const { country, prov, city, district, isp } = locationData;
+    welcomeText = `
+      <div style="margin-bottom: 8px;">
+        <i class="fas fa-map-marker-alt" style="color: var(--primary-color); margin-right: 8px;"></i>
+        <strong>欢迎来自${country}的朋友！</strong>
+      </div>
+      <div style="font-size: 12px; color: #888; line-height: 1.4;">
+        📍 ${prov} ${city} ${district}<br>
+        🌐 ${isp}<br>
+        🔗 IP: ${ip}
+      </div>
+    `;
+  } else {
+    welcomeText = `
+      <div>
+        <i class="fas fa-globe" style="color: var(--primary-color); margin-right: 8px;"></i>
+        <strong>欢迎访问我的网站！</strong>
+      </div>
+      <div style="font-size: 12px; color: #888; margin-top: 5px;">
+        感谢您的到来 🎉
+      </div>
+    `;
+  }
+
+  welcomeContainer.innerHTML = `
+    ${welcomeText}
+    <button id="close-welcome" style="
+      position: absolute;
+      top: 5px;
+      right: 8px;
+      background: none;
+      border: none;
+      color: var(--primary-color);
+      cursor: pointer;
+      font-size: 16px;
+      padding: 0;
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    ">×</button>
+  `;
+
+  // 添加CSS动画
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes slideInRight {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+    
+    @keyframes slideOutRight {
+      from {
+        transform: translateX(0);
+        opacity: 1;
+      }
+      to {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+    }
+    
+    #visitor-welcome.slide-out {
+      animation: slideOutRight 0.3s ease-in forwards;
+    }
+    
+    @media (max-width: 768px) {
+      #visitor-welcome {
+        top: 10px;
+        right: 10px;
+        left: 10px;
+        max-width: none;
+        font-size: 12px;
+      }
+    }
+  `;
+  
+  if (!document.querySelector('#welcome-styles')) {
+    style.id = 'welcome-styles';
+    document.head.appendChild(style);
+  }
+
+  // 添加到页面
+  document.body.appendChild(welcomeContainer);
+
+  // 关闭按钮事件
+  const closeButton = document.getElementById('close-welcome');
+  closeButton.addEventListener('click', () => {
+    welcomeContainer.classList.add('slide-out');
+    setTimeout(() => {
+      if (document.body.contains(welcomeContainer)) {
+        document.body.removeChild(welcomeContainer);
+      }
+    }, 300);
+  });
+
+  // 10秒后自动关闭
+  // setTimeout(() => {
+  //   if (document.body.contains(welcomeContainer)) {
+  //     welcomeContainer.classList.add('slide-out');
+  //     setTimeout(() => {
+  //       if (document.body.contains(welcomeContainer)) {
+  //         document.body.removeChild(welcomeContainer);
+  //       }
+  //     }, 300);
+  //   }
+  // }, 10000);
+
+  // // 添加到终端状态消息中
+  // if (locationData) {
+  //  // updateTerminalStatus(locationData);
+  // }
+}
+
+/**
+ * 更新终端状态消息
+ */
+function updateTerminalStatus(locationData) {
+  const statusElement = document.getElementById('status-message');
+  if (statusElement && locationData) {
+    const { country, prov, city } = locationData;
+    const originalText = statusElement.textContent;
+    
+    // 添加地理位置信息到状态消息
+    setTimeout(() => {
+      statusElement.innerHTML = `
+        <div>${originalText}</div>
+        <div style="margin-top: 5px; color: var(--primary-color); font-size: 0.9em;">
+          🌍 检测到来自 ${country} ${prov} ${city} 的访问
+        </div>
+      `;
+    }, 2000);
+  }
 }
