@@ -1,0 +1,2105 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>健身营养智能工具</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        /* 全局样式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #e0f7ff, #ffffff);
+            min-height: 100vh;
+            color: #334155;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        /* 首页样式 */
+        .home-container {
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .home-container h1 {
+            color: #0ea5e9;
+            margin-bottom: 10px;
+            font-size: 2rem;
+        }
+        
+        .home-subtitle {
+            color: #64748b;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+        
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2px;
+            margin-bottom: 5px;
+        }
+        
+        .tool-card {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 15px;
+            padding: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            margin: 5px
+        }
+        
+        .tool-card:hover {
+            transform: translateY(-5px);
+            border-color: #0ea5e9;
+            box-shadow: 0 5px 20px rgba(14, 165, 233, 0.2);
+        }
+        
+        .tool-card h2 {
+            color: #0ea5e9;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+        
+        .tool-card p {
+            color: #475569;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        
+        .tool-features {
+            list-style: none;
+            text-align: left;
+            color: #64748b;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+        
+        .tool-features li {
+            padding: 5px 0;
+            padding-left: 20px;
+            position: relative;
+                display: inline-block;
+    text-align: left;
+    margin: 0 10px;
+        }
+        
+        .tool-features li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #10b981;
+            font-weight: bold;
+            
+        }
+        
+        .btn-enter {
+            background: #0ea5e9;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 15px;
+        }
+        
+        .btn-enter:hover {
+            background: #0284c7;
+            transform: scale(1.05);
+        }
+        
+        .badge {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            background: #f59e0b;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        
+        .badge.dev {
+            background: #94a3b8;
+        }
+        
+        .comparison-table {
+            background: #f8fafc;
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 30px;
+            text-align: left;
+        }
+        
+        .comparison-table h3 {
+            color: #0ea5e9;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: center;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        th {
+            background: #e0f2fe;
+            color: #0c4a6e;
+            font-weight: 600;
+        }
+        
+        tr:hover {
+            background: #f0f9ff;
+        }
+        
+        /* 工具页面样式 */
+        .tool-page {
+            display: none;
+        }
+        
+        /* 凯圣王碳循环样式 */
+        :root{
+          --primary:#0ea5e9;
+          --primary-light:#38bdf8;
+          --success:#10b981;
+          --warning:#f59e0b;
+          --danger:#f43f5e;
+          --dark:#1e293b;
+          --light:#f8fafc;
+          --high:#bae6fd;
+          --med:#e0f2fe;
+          --low:#fef3c7;
+        }
+        
+        header{color:#0ea5e9;text-align:center;margin-bottom:24px;position:relative;}
+        header h1{font-size:1.8rem;margin-bottom:4px;font-weight:700}
+        header .subtitle{font-size:.9rem;color:#64748b}
+        
+        .back-home-btn {
+            position: absolute;
+            top: 0;
+            left: 0;
+            background: #94a3b8;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .back-home-btn:hover {
+            background: #64748b;
+        }
+        
+        .tabs{display:flex;justify-content:center;margin-bottom:20px;border-bottom:1px solid #cbd5e1}
+        .tab-btn{
+          padding:10px 20px;
+          background:none;
+          border:none;
+          cursor:pointer;
+          font-size:1rem;
+          font-weight:600;
+          color:#64748b;
+          border-bottom:3px solid transparent;
+          transition:.3s;
+        }
+        .tab-btn.active{
+          color:#0ea5e9;
+          border-bottom-color:#0ea5e9;
+        }
+        .tab-content{display:none}
+        .tab-content.active{display:block}
+        
+        .top-row{display:flex;gap:16px;flex-wrap:wrap}
+        .top-row>section{
+          background:#fff;
+          border-radius:12px;
+          padding:16px;
+          box-shadow:0 1px 3px rgba(0,0,0,.08);
+          flex:1 1 260px;
+          min-width:260px;
+        }
+        .top-row h3{
+          font-size:1rem;
+          margin-bottom:10px;
+          color:#0ea5e9;
+          font-weight:600;
+        }
+        .basic-row,.macro-row{display:flex;gap:8px;flex-wrap:wrap}
+        .basic-row .input-group,.macro-row .input-group{flex:1 1 100px;display:flex;flex-direction:column}
+        .top-row label{font-size:.8rem;font-weight:600;margin-bottom:4px}
+        .top-row input,.top-row select{
+          padding:6px 8px;
+          font-size:.8rem;
+          border:1px solid #cbd5e1;
+          border-radius:6px;
+        }
+        
+        .target-weight-input-group {
+          flex: 0 1 auto !important;
+          min-width: unset !important;
+        }
+        
+        .target-weight-controls {
+          display: flex;
+          align-items: center;
+          gap: 4px;
+          justify-content: center;
+        }
+        
+        .target-weight-controls input {
+          width: 50px !important;
+          text-align: center;
+          margin: 0 2px;
+        }
+        
+        .target-weight-controls button {
+          flex: 0 0 20px;
+          height:20px;
+          border:1px solid var(--primary-light);
+          background:#fff;
+          color:var(--primary-light);
+          border-radius:50%;
+          font-size:14px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+        }
+        
+        .body-type-cards,.plan-cards{display:flex;gap:6px;flex-wrap:wrap}
+        .body-type-card,.plan-card{
+          flex:1 1 80px;
+          border:1px solid #cbd5e1;
+          border-radius:8px;
+          padding:8px 4px;
+          font-size:.7rem;
+          text-align:center;
+          cursor:pointer;
+          transition:.2s;
+          background:#fff;
+        }
+        .body-type-card:hover,.plan-card:hover{transform:translateY(-1px)}
+        .body-type-card.selected,.plan-card.selected{
+          border-color:var(--primary);
+          background:#e0f2fe;
+        }
+        .body-type-card h4,.plan-card h4{font-size:.75rem;margin-bottom:2px;color:#0ea5e9}
+        .body-type-card p,.plan-card p{font-size:.6rem;margin:0;line-height:1.2;color:#64748b}
+        
+        .summary-cards{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+        .summary-card{
+          flex:1 1 70px;
+          background:#f0f9ff;
+          border-radius:8px;
+          padding:8px;
+          text-align:center;
+          font-size:.75rem;
+        }
+        .summary-card .val{font-size:1rem;font-weight:700;color:var(--primary)}
+        .summary-card .lab{font-size:.6rem;color:#475569}
+        
+        .btn-row{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0}
+        .btn-row button{
+          flex:1 1 100px;
+          padding:10px 0;
+          border:none;
+          border-radius:6px;
+          font-size:.85rem;
+          font-weight:600;
+          cursor:pointer;
+          color:#fff;
+          transition:.2s;
+        }
+        .btn-calc{background:var(--primary)}
+        .btn-down{background:var(--success)}
+        .btn-reset{background:var(--warning)}
+        .btn-back{background:var(--dark)}
+        .btn-row button:hover{opacity:.9}
+        
+        .table-wrap{overflow-x:auto;margin-top:16px}
+        table{width:100%;border-collapse:collapse;font-size:.75rem}
+        th,td{border:1px solid #e2e8f0;padding:6px 4px;text-align:center}
+        th{background:#f1f5f9;color:#0ea5e9;font-weight:600}
+        tbody tr:nth-child(odd){background:#fff}
+        tbody tr:nth-child(even){background:#f8fafc}
+        thead tr:nth-child(2) .high{background:var(--high);color:#0c4a6e}
+        thead tr:nth-child(2) .med{background:var(--med);color:#0c4a6e}
+        thead tr:nth-child(2) .low{background:var(--low);color:#78350f}
+        .editable{background:#fffbeb}
+        
+        .notes{
+          background:#fff;
+          border-radius:12px;
+          box-shadow:0 1px 3px rgba(0,0,0,.08);
+          padding:16px 20px;
+          margin-top:20px;
+          font-size:.8rem;
+          line-height:1.6;
+          color:#475569;
+        }
+        .notes h3{margin-bottom:10px;color:#0ea5e9;font-size:1rem}
+        .notes ul{margin:0;padding-left:20px}
+        .notes li{margin-bottom:6px}
+        .notes .tag{display:inline-block;padding:2px 6px;border-radius:4px;color:#fff;font-weight:bold;margin-right:4px;font-size:.7rem}
+        .notes .tag.high{background:var(--high);color:#0c4a6e}
+        .notes .tag.med{background:var(--med);color:#0c4a6e}
+        .notes .tag.low{background:var(--low);color:#78350f}
+        footer{color:#94a3b8;text-align:center;font-size:.6rem;margin-top:20px}
+        
+        .custom-plan{display:none;gap:4px;flex-wrap:wrap;margin-top:8px}
+        .custom-plan input{
+          flex:1 1 60px;
+          font-size:.7rem;
+          padding:4px 2px;
+          text-align:center;
+          border:1px solid #cbd5e1;
+          border-radius:4px;
+        }
+        .target-info{
+          background:#fff;
+          border-radius:12px;
+          padding:16px;
+          margin-top:16px;
+          box-shadow:0 1px 3px rgba(0,0,0,.08);
+        }
+        .target-info h3{
+          font-size:1rem;
+          margin-bottom:8px;
+          color:#0ea5e9;
+          font-weight:600;
+        }
+        .target-stats{
+          display:flex;
+          gap:8px;
+          flex-wrap:wrap;
+        }
+        .target-stat{
+          flex:1 1 100px;
+          background:#f0f9ff;
+          border-radius:8px;
+          padding:8px;
+          text-align:center;
+        }
+        .target-stat .value{
+          font-size:1.1rem;
+          font-weight:700;
+          color:var(--primary);
+        }
+        .target-stat .label{
+          font-size:.7rem;
+          color:#64748b;
+        }
+        
+        /* 橙子碳水渐降特定样式 */
+        .orange-section {
+          display: none;
+        }
+        .orange-macro-row {
+          display: flex;
+          gap: 8px;
+          flex-wrap: wrap;
+          margin-bottom: 12px;
+        }
+        .orange-input-group {
+          flex: 1 1 100px;
+          display: flex;
+          flex-direction: column;
+        }
+        .orange-ratio-cards {
+          display: flex;
+          gap: 8px;
+          flex-wrap: wrap;
+          margin-bottom: 12px;
+        }
+        .orange-ratio-card {
+          flex: 1 1 120px;
+          border: 1px solid #cbd5e1;
+          border-radius: 8px;
+          padding: 8px;
+          text-align: center;
+          cursor: pointer;
+          transition: .2s;
+          background: #fff;
+        }
+        .orange-ratio-card.selected {
+          border-color: var(--primary);
+          background: #e0f2fe;
+        }
+        .orange-results {
+          background: #fff;
+          border-radius: 12px;
+          padding: 16px;
+          margin-top: 16px;
+          box-shadow: 0 1px 3px rgba(0,0,0,.08);
+        }
+        .orange-results h3 {
+          font-size: 1rem;
+          margin-bottom: 12px;
+          color: #0ea5e9;
+          font-weight: 600;
+        }
+        .orange-stats {
+          display: flex;
+          gap: 8px;
+          flex-wrap: wrap;
+          margin-bottom: 16px;
+        }
+        .orange-stat {
+          flex: 1 1 120px;
+          background: #f0f9ff;
+          border-radius: 8px;
+          padding: 10px;
+          text-align: center;
+        }
+        .orange-stat .value {
+          font-size: 1.1rem;
+          font-weight: 700;
+          color: var(--primary);
+        }
+        .orange-stat .label {
+          font-size: .7rem;
+          color: #64748b;
+        }
+        .orange-table {
+          width: 100%;
+          border-collapse: collapse;
+          margin-top: 12px;
+        }
+        .orange-table th, .orange-table td {
+          border: 1px solid #e2e8f0;
+          padding: 8px;
+          text-align: center;
+        }
+        .orange-table th {
+          background: #f1f5f9;
+          color: #0ea5e9;
+          font-weight: 600;
+        }
+        
+        /* 新增样式 */
+        .weight-loss-slider {
+          margin: 10px 0;
+        }
+        
+        .weight-loss-slider label {
+          display: block;
+          margin-bottom: 5px;
+          font-weight: 600;
+          font-size: 0.8rem;
+        }
+        
+        .slider-container {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+        }
+        
+        .slider-container input[type="range"] {
+          flex: 1;
+        }
+        
+        .slider-value {
+          min-width: 40px;
+          text-align: center;
+          font-weight: 600;
+          color: var(--primary);
+        }
+        
+        .custom-ratio-inputs {
+          display: flex;
+          gap: 8px;
+          margin-top: 8px;
+          flex-wrap: wrap;
+        }
+        
+        .custom-ratio-input {
+          flex: 1;
+          min-width: 80px;
+        }
+        
+        .custom-ratio-input label {
+          font-size: 0.7rem;
+          font-weight: 600;
+          display: block;
+          margin-bottom: 4px;
+        }
+        
+        .custom-ratio-input input {
+          width: 100%;
+          padding: 4px;
+          border: 1px solid #cbd5e1;
+          border-radius: 4px;
+          text-align: center;
+        }
+        
+        .ratio-sum {
+          margin-top: 8px;
+          font-size: 0.8rem;
+          color: #64748b;
+        }
+        
+        .ratio-sum.error {
+          color: var(--danger);
+          font-weight: 600;
+        }
+        
+        /* 媒体查询：针对小屏幕设备的优化 */
+        @media (max-width: 480px) {
+          .basic-row .input-group {
+            flex: 1 1 100px !important;
+          }
+          
+          .target-weight-input-group {
+            flex: 0 1 120px !important;
+          }
+          
+          .target-weight-controls {
+            justify-content: flex-start;
+          }
+          
+          .tab-btn {
+            padding: 8px 12px;
+            font-size: 0.9rem;
+          }
+          
+          .tools-grid {
+            grid-template-columns: 1fr;
+          }
+          
+          .home-container {
+            padding: 20px;
+          }
+          
+          .home-container h1 {
+            font-size: 1.5rem;
+          }
+          
+          .back-home-btn {
+            position: relative;
+            margin-bottom: 15px;
+          }
+        }
+    </style>
+</head>
+<body>
+    <!-- 首页 -->
+    <div id="home-page" class="container home-container">
+        <h1>健身营养智能工具</h1>
+        <!-- 体脂率参考区域 -->
+<div style="text-align:center; margin:0 auto 5px;">   <!-- 统一控制间距 -->
+    <a href="javascript:void(0)"
+       onclick="toggleBodyFatImage()"
+       style="color:#E53E3E;font-size:17px;text-decoration:underline;">
+        📌 点击查看体脂率参考图
+    </a>
+    <div id="bodyfat-container" style="display:none;margin-top:12px;"> <!-- 上间距只给容器内部 -->
+        <img src="https://img0.baidu.com/it/u=1083536515,1293547436&fm=253&fmt=auto?w=800&h=1067"
+             alt="体脂率参考" style="max-width:100%;height:auto;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,.15)">
+        <p style="margin-top:8px;font-size:.85rem;color:#64748b">常见体脂率外观对照，仅供参考</p>
+    </div>
+</div>
+<div class="tool-card" onclick="selectTool('orange-carb')">
+                <span class="badge">新手选这个</span>
+                <h2>橙子碳水渐降</h2>
+                <p>通过逐步降低碳水化合物摄入量,<br>温和实现减脂目标。</p>
+                <ul class="tool-features">
+                    <li>适合训练少的新手</li>
+                    <li>适合大基数高体脂</li>
+                    <li>渐降式调整碳水</li>
+                    <li>减脂速度平缓</li>
+                </ul>
+                <button class="btn-enter">立即使用</button>
+            </div>
+        <div class="tools-grid">
+            <div class="tool-card" onclick="selectTool('kings-cycle')">
+                <span class="badge">没招了就选这个</span>
+                <h2>凯圣王碳循环</h2>
+                <p>通过周期性调整碳水化合物摄入量,<br>实现高效减脂增肌的目标。</p>
+                <ul class="tool-features">
+                    <li>适合健身爱好者</li>
+                    <li>平台期大杀器</li>
+                    <li>减脂速度快</li>
+                    <li>需要记录饮食</li>
+                </ul>
+                <button class="btn-enter">立即使用</button>
+            </div>
+<!-- 增肌计划 -->
+<div class="tool-card" onclick="selectTool('bulk-plan')">
+    <span class="badge">肌肉拼图</span>
+    <h2>增肌计划</h2>
+    <p>小热量盈余 + 正氮平衡。<br>参考来源:运动营养学、闪电增肌、健身营养书、凯圣王、自然王等</p>
+    <ul class="tool-features">
+        <li>自动计算 BMR / TDEE</li>
+        <li>三档热量盈余可选</li>
+        <li>训练日 / 休息日动态碳水</li>
+        <li>支持导出 Excel</li>
+    </ul>
+    <button class="btn-enter">立即使用</button>
+</div>
+        </div>
+
+    </div>
+
+    <!-- 凯圣王碳循环工具 -->
+    <div id="kings-cycle-tool" class="tool-page">
+        <div class="container">
+            <header style="display:flex; align-items:center; gap:12px;">
+    <button class="back-home-btn" onclick="backToHome()"style="position:static;margin:0;font-size:0.8rem;padding:5px 6px;"> 返回</button>
+    <div>
+        <h1 style="margin:0;">健身营养智能工具</h1>
+        
+    </div>
+</header>
+
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="kings-cycle">凯圣王碳循环</button>
+                <button class="tab-btn" data-tab="orange-carb">橙子碳水渐降</button>
+            </div>
+
+            <!-- 凯圣王碳循环部分 -->
+            <div id="kings-cycle" class="tab-content active">
+                <!-- 凯圣王碳循环内容保持不变 -->
+                <div class="top-row">
+                    <!-- 基础信息 -->
+                    <section>
+                        <h3>第一步：输入基础信息</h3>
+                        <div class="basic-row">
+                            <div class="input-group"><label>当前体重(kg)</label><input type="number" id="weight" value="75" min="40" max="200"></div>
+                            <div class="input-group target-weight-input-group">
+                                <label>目标体重(±5kg)</label>
+                                <div class="target-weight-controls">
+                                    <button type="button" onclick="adjustTarget(-1)">−</button>
+                                    <input type="tel" id="targetWeight" value="70" min="40" max="200" step="1" pattern="\d*" oninput="clipTargetWeight()">
+                                    <button type="button" onclick="adjustTarget(1)">+</button>
+                                </div>
+                            </div>
+                            <div class="input-group"><label>身高(cm)</label><input type="number" id="height" value="178" min="140" max="220"></div>
+                            <div class="input-group"><label>年龄(岁)</label><input type="number" id="age" value="30" min="18" max="80"></div>
+                            <div class="input-group"><label>性别</label>
+                                <select id="gender"><option value="male">男</option><option value="female">女</option></select>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- 胚型 -->
+                    <section>
+                        <h3>第二步：选择胚型</h3>
+                        <div class="body-type-cards">
+                            <div class="body-type-card selected" data-type="ectomorph"><h4>外胚型</h4><p>易瘦</p></div>
+                            <div class="body-type-card" data-type="mesomorph"><h4>中胚型</h4><p>肌肉型</p></div>
+                            <div class="body-type-card" data-type="endomorph"><h4>内胚型</h4><p>易胖</p></div>
+                        </div>
+                        <!-- 胚型参考图 -->
+<div style="text-align:center;margin-top:10px;">
+  <a href="javascript:void(0)"
+     onclick="toggleBodyTypeRef()"
+     style="color:#E53E3E;font-size:.85rem;text-decoration:underline;">
+    📌 点击查看胚型参考图
+  </a>
+  <div id="bodytype-ref" style="display:none;margin-top:12px;">
+    <img src="https://qcloud.dpfile.com/pc/CqGM_UcCrvGcGH_XM4yXFCYjwgNnaLZ8cSnss-iMlxboDaSWvqnh_75XjQjKtRzN.jpg"  
+         alt="胚型参考" style="max-width:100%;height:auto;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.15)">
+    <p style="margin-top:6px;font-size:.75rem;color:#64748b">外胚 / 中胚 / 内胚 体型对照，仅供参考</p>
+  </div>
+</div>
+                    </section>
+
+                    <!-- 训练计划 -->
+                    <section>
+                        <h3>第三步：选择训练计划</h3>
+                        <div class="plan-cards">
+                            <div class="plan-card selected" data-plan="1"><h4>练1休1</h4><p>循环</p></div>
+                            <div class="plan-card" data-plan="2"><h4>练2休1</h4><p>循环</p></div>
+                            <div class="plan-card" data-plan="3"><h4>练3休1</h4><p>循环</p></div>
+                            <div class="plan-card" data-plan="4"><h4>练4休1</h4><p>循环</p></div>
+                            <div class="plan-card" data-plan="custom"><h4>自定义</h4><p>自由</p></div>
+                        </div>
+                        <div class="custom-plan" id="customPlan">
+                            <input placeholder="周一" id="cus-mon">
+                            <input placeholder="周二" id="cus-tue">
+                            <input placeholder="周三" id="cus-wed">
+                            <input placeholder="周四" id="cus-thu">
+                            <input placeholder="周五" id="cus-fri">
+                            <input placeholder="周六" id="cus-sat">
+                            <input placeholder="周日" id="cus-sun">
+                        </div>
+                    </section>
+
+                    <!-- 宏量 -->
+                    <section>
+                        <h3>营养素设置（已根据胚型自动匹配，无需调整）</h3>
+                        <div class="macro-row">
+                            <div class="input-group"><label>碳水(g/kg)</label><input type="number" id="carbsPerKg" value="3.0" step="0.1" min="1" max="10"></div>
+                            <div class="input-group"><label>蛋白质(g/kg)</label><input type="number" id="proteinPerKg" value="1.3" step="0.1" min="0.8" max="3"></div>
+                            <div class="input-group"><label>脂肪(g/kg)</label><input type="number" id="fatPerKg" value="1.1" step="0.1" min="0.5" max="2"></div>
+                        </div>
+                    </section>
+
+                    <!-- 汇总 -->
+                    <section>
+                        <h3>最后一步：点击下方计算计划</h3>
+                        <div class="summary-cards">
+                            <div class="summary-card"><span class="val" id="bmrValue">1852</span><div class="lab">基础代谢</div></div>
+                            <div class="summary-card"><span class="val" id="tdeeValue">2352</span><div class="lab">每日总消耗</div></div>
+                            <div class="summary-card"><span class="val" id="proteinValue">98</span><div class="lab">每日蛋白(g)</div></div>
+                            <div class="summary-card"><span class="val" id="carbsValue">1575</span><div class="lab">每周碳水(g)</div></div>
+                        </div>
+                    </section>
+                </div>
+
+                <div class="btn-row">
+                    <button class="btn-calc" id="calculateBtn">计算计划</button>
+                    <button class="btn-down" id="downloadBtn">下载Excel(电脑端)</button>
+                    <button class="btn-reset" id="resetBtn">重置</button>
+                    <button class="btn-back" onclick="backToHome()">返回首页</button>
+                </div>
+
+                <div class="target-info">
+                    <h3>目标体重分析</h3>
+                    <div class="target-stats">
+                        <div class="target-stat">
+                            <div class="value" id="weightDiffValue">-5</div>
+                            <div class="label">体重差(kg)</div>
+                        </div>
+                        <div class="target-stat">
+                            <div class="value" id="weeklyCalorieDiffValue">-1400</div>
+                            <div class="label">周热量差(kcal)</div>
+                        </div>
+                        <div class="target-stat">
+                            <div class="value" id="daysNeededValue">42</div>
+                            <div class="label">预计天数</div>
+                        </div>
+                        <div class="target-stat">
+                            <div class="value" id="targetDate">2023-12-24</div>
+                            <div class="label">减掉5公斤纯脂肪的预计完成日期</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-wrap">
+                    <table id="planTable">
+                        <thead>
+                            <tr><th rowspan="2">项目</th><th>一</th><th>二</th><th>三</th><th>四</th><th>五</th><th>六</th><th>日</th></tr>
+                            <tr id="carbLevelRow">
+                                <th class="med">中</th>
+                                <th class="high">高</th>
+                                <th class="low">低</th>
+                                <th class="med">中</th>
+                                <th class="low">低</th>
+                                <th class="high">高</th>
+                                <th class="med">中</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="band"><td>训练部位<br>(可双击自定义)</td><td class="editable">休息</td><td class="editable">胸+三头</td><td class="editable">休息</td><td class="editable">背+二头</td><td class="editable">休息</td><td class="editable">腿+肩</td><td class="editable">休息</td></tr>
+                            <tr class="band"><td>碳水(g)</td><td id="carb-mon">192</td><td id="carb-tue">412</td><td id="carb-wed">124</td><td id="carb-thu">192</td><td id="carb-fri">124</td><td id="carb-sat">412</td><td id="carb-sun">124</td></tr>
+                            <tr class="band"><td>蛋白质(g)</td><td id="protein-mon">118</td><td id="protein-tue">118</td><td id="protein-wed">118</td><td id="protein-thu">118</td><td id="protein-fri">118</td><td id="protein-sat">118</td><td id="protein-sun">118</td></tr>
+                            <tr class="band"><td>脂肪(g)</td><td id="fat-mon">64</td><td id="fat-tue">41</td><td id="fat-wed">137</td><td id="fat-thu">64</td><td id="fat-fri">137</td><td id="fat-sat">41</td><td id="fat-sun">137</td></tr>
+                            <tr class="band"><td>热量(kcal)</td><td id="cal-mon">1817</td><td id="cal-tue">2490</td><td id="cal-wed">2202</td><td id="cal-thu">1817</td><td id="cal-fri">2202</td><td id="cal-sat">2490</td><td id="cal-sun">2202</td></tr>
+                            <tr class="band"><td>缺口/盈余</td><td id="diff-mon">-535</td><td id="diff-tue">138</td><td id="diff-wed">-150</td><td id="diff-thu">-535</td><td id="diff-fri">-150</td><td id="diff-sat">138</td><td id="diff-sun">-150</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="notes">
+                    <h3>📌 碳循环计划说明</h3>
+                    <ul>
+                        <li>如果你骨架小、肩窄、吃不胖、增肌慢：<strong>→ 偏外胚型</strong></li>
+                        <li>如果你肩宽腰窄、肌肉容易长：<strong>→ 偏中胚型</strong></li>
+                        <li>如果你骨架大、腰腹易囤肉：<strong>→ 偏内胚型</strong></li>
+                        <li><span class="tag high">高碳日</span>：碳水占周总碳水的50%，建议摄入精制碳水（如白米、白面包）</li>
+                        <li><span class="tag med">中碳日</span>：碳水占周总碳水的35%，建议混合精碳和粗碳</li>
+                        <li><span class="tag low">低碳日</span>：碳水占周总碳水的15%，建议摄入粗碳（如糙米、燕麦）</li>
+                        <li><strong>热量换算：</strong> 碳/蛋白 4 kcal/g，脂肪 9 kcal/g。</li>
+                        <li><strong>体重变化估算：</strong> 每减少7700 kcal热量约减少1 kg体重，每增加7700 kcal热量约增加1 kg体重。</li>
+                    </ul>
+                </div>
+            </div>
+<!-- 增肌计划部分 -->
+<div id="bulk-plan" class="tab-content">
+    <div class="top-row">
+        <!-- 基础信息 -->
+        <section>
+            <h3>第一步：基础信息</h3>
+            <div class="basic-row">
+                <div class="input-group"><label>体重(kg)</label><input type="number" id="bulk-weight" value="70" min="40" max="150"></div>
+                <div class="input-group"><label>身高(cm)</label><input type="number" id="bulk-height" value="175" min="140" max="220"></div>
+                <div class="input-group"><label>年龄(岁)</label><input type="number" id="bulk-age" value="25" min="18" max="60"></div>
+                <div class="input-group"><label>性别</label>
+                    <select id="bulk-gender"><option value="male">男</option><option value="female">女</option></select>
+                </div>
+            </div>
+        </section>
+
+        <!-- 活动系数 -->
+        <section>
+            <h3>第二步：日常活动强度</h3>
+            <div class="bulk-level-cards" id="pal-cards">
+                <div class="bulk-level-card selected" data-pal="1.2"><h4>久坐</h4><p>办公室/几乎无运动</p></div>
+                <div class="bulk-level-card" data-pal="1.375"><h4>轻度活跃</h4><p>每周轻度1-3天</p></div>
+                <div class="bulk-level-card" data-pal="1.55"><h4>中度活跃</h4><p>每周中度3-5天</p></div>
+                <div class="bulk-level-card" data-pal="1.725"><h4>非常活跃</h4><p>每周高强度6-7天</p></div>
+                <div class="bulk-level-card" data-pal="1.9"><h4>职业运动员</h4><p>每天高强度</p></div>
+            </div>
+        </section>
+
+        <!-- 训练经验 -->
+        <section>
+            <h3>第三步：训练经验</h3>
+            <div class="bulk-level-cards" id="exp-cards">
+                <div class="bulk-level-card selected" data-exp="novice"><h4>新手</h4><p>系统训练 &lt;1 年</p></div>
+                <div class="bulk-level-card" data-exp="intermediate"><h4>中级</h4><p>系统训练 1-3 年</p></div>
+                <div class="bulk-level-card" data-exp="advanced"><h4>高级</h4><p>系统训练 &gt;3 年</p></div>
+            </div>
+            
+        </section>
+
+        <!-- 热量盈余 -->
+        <section>
+            <h3>第四步：热量盈余</h3>
+            <div class="bulk-level-cards" id="surplus-cards">
+                <div class="bulk-level-card selected" data-surplus="200"><h4>减脂人增肌</h4><p>+200 kcal/日</p></div>
+                <div class="bulk-level-card" data-surplus="350"><h4>力量型增肌</h4><p>+350 kcal/日</p></div>
+                <div class="bulk-level-card" data-surplus="550"><h4>瘦子脏增肌</h4><p>+550 kcal/日</p></div>
+                
+            </div>
+        </section>
+<!-- 新增：训练计划选择 -->
+    <section>
+      <h3>第五步：选择训练计划</h3>
+      <div class="plan-cards" id="bulk-plan-cards">
+        <div class="plan-card selected" data-plan="1"><h4>练1休1</h4><p>循环</p></div>
+        <div class="plan-card" data-plan="2"><h4>练2休1</h4><p>循环</p></div>
+        <div class="plan-card" data-plan="3"><h4>练3休1</h4><p>循环</p></div>
+        <div class="plan-card" data-plan="4"><h4>练4休1</h4><p>循环</p></div>
+        <div class="plan-card" data-plan="custom"><h4>自定义</h4><p>自由</p></div>
+      </div>
+      <!-- 自定义输入区 -->
+      <div class="custom-plan" id="bulk-custom-plan" style="display:none;gap:4px;flex-wrap:wrap;margin-top:8px">
+        <input placeholder="周一" id="bulk-cus-mon">
+        <input placeholder="周二" id="bulk-cus-tue">
+        <input placeholder="周三" id="bulk-cus-wed">
+        <input placeholder="周四" id="bulk-cus-thu">
+        <input placeholder="周五" id="bulk-cus-fri">
+        <input placeholder="周六" id="bulk-cus-sat">
+        <input placeholder="周日" id="bulk-cus-sun">
+      </div>
+    </section>
+        <!-- 结果汇总 -->
+        <section>
+            <h3>计算结果</h3>
+            <div class="bulk-stats">
+                <div class="bulk-stat"><div class="value" id="bulk-bmr">0</div><div class="label">基础代谢(BMR)</div></div>
+                <div class="bulk-stat"><div class="value" id="bulk-tdee">0</div><div class="label">每日消耗(TDEE)</div></div>
+                <div class="bulk-stat"><div class="value" id="bulk-target">0</div><div class="label">训练日摄入热量</div></div>
+                <div class="bulk-stat"><div class="value" id="bulk-protein">0</div><div class="label">每日摄入蛋白质(g)</div></div>
+                <div class="bulk-stat"><div class="value" id="bulk-carb-display">0</div><div class="label">训练日碳水(g)</div></div>
+                <div class="bulk-stat"><div class="value" id="bulk-rest-carb-display">0</div><div class="label">休息日碳水(g)</div></div>
+		<div class="bulk-stat"><div class="value" id="bulk-fat-display">0</div><div class="label">每日脂肪(g)</div></div>
+		<!-- 预计每周增重 -->
+<div class="bulk-stat">
+  <div class="value" id="bulk-weekly-gain">—</div>
+  <div class="label">预计每周增重(kg)</div>
+</div>
+            </div>
+        </section>
+    </div>
+
+    <div class="btn-row">
+        <button class="btn-calc" id="bulk-calc">计算计划</button>
+        <button class="btn-down" id="bulk-dl">下载Excel(电脑端)</button>
+        <button class="btn-reset" id="bulk-reset">重置</button>
+        <button class="btn-back" onclick="backToHome()">返回首页</button>
+    </div>
+
+<!-- 详细宏量表格 -->
+<div class="table-wrap">
+  <table id="bulk-week-table">
+<thead>
+  <tr>
+    <th>项目</th>
+    <th>一</th><th>二</th><th>三</th><th>四</th><th>五</th><th>六</th><th>日</th>
+  </tr>
+</thead>
+    <tbody>
+      <tr class="band"><td>训练部位<br>(可双击自定义)</td>
+        <td class="editable" data-day="0">胸+三头</td>
+        <td class="editable" data-day="1">背+二头</td>
+        <td class="editable" data-day="2">休息</td>
+        <td class="editable" data-day="3">腿+肩</td>
+        <td class="editable" data-day="4">休息</td>
+        <td class="editable" data-day="5">胸+三头</td>
+        <td class="editable" data-day="6">休息</td>
+      </tr>
+      <tr class="band"><td>碳水(g)</td>
+        <td id="bulk-carb-0">0</td><td id="bulk-carb-1">0</td><td id="bulk-carb-2">0</td>
+        <td id="bulk-carb-3">0</td><td id="bulk-carb-4">0</td><td id="bulk-carb-5">0</td><td id="bulk-carb-6">0</td>
+      </tr>
+      <tr class="band"><td>蛋白质(g)</td>
+        <td id="bulk-pro-0">0</td><td id="bulk-pro-1">0</td><td id="bulk-pro-2">0</td>
+        <td id="bulk-pro-3">0</td><td id="bulk-pro-4">0</td><td id="bulk-pro-5">0</td><td id="bulk-pro-6">0</td>
+      </tr>
+      <tr class="band"><td>脂肪(g)</td>
+        <td id="bulk-fat-0">0</td><td id="bulk-fat-1">0</td><td id="bulk-fat-2">0</td>
+        <td id="bulk-fat-3">0</td><td id="bulk-fat-4">0</td><td id="bulk-fat-5">0</td><td id="bulk-fat-6">0</td>
+      </tr>
+      <tr class="band"><td>热量(kcal)</td>
+        <td id="bulk-cal-0">0</td><td id="bulk-cal-1">0</td><td id="bulk-cal-2">0</td>
+        <td id="bulk-cal-3">0</td><td id="bulk-cal-4">0</td><td id="bulk-cal-5">0</td><td id="bulk-cal-6">0</td>
+      </tr>
+      <tr class="band"><td>盈余/缺口</td>
+        <td id="bulk-diff-0">0</td><td id="bulk-diff-1">0</td><td id="bulk-diff-2">0</td>
+        <td id="bulk-diff-3">0</td><td id="bulk-diff-4">0</td><td id="bulk-diff-5">0</td><td id="bulk-diff-6">0</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+    <div class="notes">
+        <h3>📌 增肌计划说明</h3>
+        <ul>
+            <li>蛋白质按训练经验分级：新手 1.6 g/kg、中级 1.8 g/kg、高级 2 g/kg。</li>
+            <li>脂肪按训练经验分级：新手 0.9 g/kg、中级 1.0g/kg、高级 1.2 g/kg。</li>
+            <li>碳水按训练经验分级：新手 3.5 g/kg、中级 4.5g/kg、高级 5 g/kg。</li>
+            <li>剩余热量全部给碳水，休息日 -15% 碳水。</li>
+        </ul>
+    </div>
+</div>
+            <!-- 橙子碳水渐降部分 -->
+            <div id="orange-carb" class="tab-content">
+                <div class="top-row">
+                    <!-- 基础信息 -->
+                    <section>
+                        <h3>第一步：输入基础信息</h3>
+                        <div class="basic-row">
+                            <div class="input-group"><label>当前体重(kg)</label><input type="number" id="orange-weight" value="80" min="40" max="200"></div>
+                            <div class="input-group"><label>身高(cm)</label><input type="number" id="orange-height" value="175" min="140" max="220"></div>
+                            <div class="input-group"><label>年龄(岁)</label><input type="number" id="orange-age" value="32" min="18" max="80"></div>
+                            <div class="input-group"><label>性别</label>
+                                <select id="orange-gender"><option value="male">男</option><option value="female">女</option></select>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- 训练信息 -->
+                    <section>
+                        <h3>第二步：训练信息</h3>
+                        <div class="orange-input-group">
+                            <label>训练时长(分钟)</label>
+                            <input type="number" id="train-time" value="60" min="30" max="180">
+                        </div>
+                        <div class="orange-input-group">
+                            <label>训练强度系数</label>
+                            <select id="train-intensity">
+                                <option value="5">新手/女生 (5)</option>
+                                <option value="8" selected>普通健身爱好者 (8)</option>
+                                <option value="10">高强度训练者 (10)</option>
+                            </select>
+                        </div>
+                    </section>
+
+                    <!-- 营养素比例 -->
+                    <section>
+                        <h3>第三步：选择营养素比例</h3>
+                        <div class="orange-ratio-cards">
+                            <div class="orange-ratio-card selected" data-ratio="532">
+                                <h4>532比例</h4>
+                                <p>碳水50% 蛋白30% 脂肪20%</p>
+                            </div>
+                            <div class="orange-ratio-card" data-ratio="442">
+                                <h4>442比例<br>(碳水吸收较好)</h4>
+                                <p>碳水40% 蛋白40% 脂肪20%</p>
+                            </div>
+                            <div class="orange-ratio-card" data-ratio="custom">
+                                <h4>自定义比例</h4>
+                                <p>自定义营养素比例</p>
+                            </div>
+                        </div>
+                        
+                        <!-- 自定义比例输入 -->
+                        <div id="custom-ratio-inputs" style="display: none; margin-top: 10px;">
+                            <div class="custom-ratio-inputs">
+                                <div class="custom-ratio-input">
+                                    <label>碳水(%)</label>
+                                    <input type="number" id="custom-carb" value="50" min="0" max="100">
+                                </div>
+                                <div class="custom-ratio-input">
+                                    <label>蛋白质(%)</label>
+                                    <input type="number" id="custom-protein" value="30" min="0" max="100">
+                                </div>
+                                <div class="custom-ratio-input">
+                                    <label>脂肪(%)</label>
+                                    <input type="number" id="custom-fat" value="20" min="0" max="100">
+                                </div>
+                            </div>
+                            <div class="ratio-sum" id="ratio-sum">总和: 100%</div>
+                        </div>
+                    </section>
+                    
+                    <!-- 减重目标 -->
+                    <section>
+                        <h3>第四步：设置减重目标</h3>
+                        <div class="weight-loss-slider">
+                            <label>每月减重百分比 (3-5%)</label>
+                            <div class="slider-container">
+                                <input type="range" id="weight-loss-percent" min="3" max="5" step="0.1" value="3.5">
+                                <span class="slider-value" id="weight-loss-value">3.5%</span>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+
+                <div class="btn-row">
+                    <button class="btn-calc" id="orange-calculateBtn">计算计划</button>
+                    <button class="btn-down" id="orange-downloadBtn">下载Excel(电脑端)</button>
+                    <button class="btn-reset" id="orange-resetBtn">重置</button>
+                    <button class="btn-back" onclick="backToHome()">返回首页</button>
+                </div>
+
+                <div class="orange-results">
+                    <h3>您的碳水渐降计划</h3>
+                    <div class="orange-stats">
+                        <div class="orange-stat">
+                            <div class="value" id="orange-bmrValue">0</div>
+                            <div class="label">基础代谢(BMR)</div>
+                        </div>
+                        <div class="orange-stat">
+                            <div class="value" id="orange-trainCalories">0</div>
+                            <div class="label">训练消耗热量</div>
+                        </div>
+                        <div class="orange-stat">
+                            <div class="value" id="orange-tdeeValue">0</div>
+                            <div class="label">每日总消耗(TDEE)</div>
+                        </div>
+                        <div class="orange-stat">
+                            <div class="value" id="orange-initialCarbs">0</div>
+                            <div class="label">初始碳水(g)</div>
+                        </div>
+                    </div>
+
+                    <div class="orange-stats">
+                        <div class="orange-stat">
+                            <div class="value" id="orange-protein">0</div>
+                            <div class="label">蛋白质(g)</div>
+                        </div>
+                        <div class="orange-stat">
+                            <div class="value" id="orange-fat">0</div>
+                            <div class="label">脂肪(g)</div>
+                        </div>
+                        <div class="orange-stat">
+                            <div class="value" id="orange-weeklyLoss">0</div>
+                            <div class="label">周减重目标(kg)</div>
+                        </div>
+                        <div class="orange-stat">
+                            <div class="value" id="orange-adjustment">15</div>
+                            <div class="label">碳水调整量(g)</div>
+                        </div>
+                    </div>
+                    
+                    <div class="orange-stats">
+                      
+                    </div>
+
+                    <h4>碳水渐降计划表</h4>
+                    <div class="table-wrap">
+                        <table class="orange-table" id="orange-planTable">
+                            <thead>
+                                <tr>
+                                    <th>周数</th>
+                                    <th>每日碳水(g)</th>
+                                    <th>每日蛋白质(g)</th>
+                                    <th>每日脂肪(g)</th>
+                                    <th>预期体重(kg)</th>
+                                    <th>周减重目标(kg)</th>
+                                    <th>调整说明</th>
+                                </tr>
+                            </thead>
+                            <tbody id="orange-planBody">
+                                <!-- 计划内容将通过JS生成 -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="notes">
+                    <h3>📌 碳水渐降计划说明</h3>
+                    <ul>
+                        <li><strong>计算基础代谢(BMR)：</strong> 使用 Mifflin-St Jeor 公式计算</li>
+                        <li><strong>训练消耗热量：</strong> 训练时长(分钟) × 强度系数</li>
+                        <li><strong>每日总消耗(TDEE)：</strong> BMR + 训练消耗热量</li>
+                        <li><strong>初始碳水计算：</strong> TDEE × 碳水比例 ÷ 4</li>
+                        <li><strong>周减重目标：</strong> 每月减重3-5%，平均到每周</li>
+                        <li><strong>碳水调整：</strong> 每周如未达到减重目标，减少碳水15-30g</li>
+                        <li><strong>停止调整：</strong> 当碳水降至100g左右或达到理想体脂率时停止</li>
+                    </ul>
+                </div>
+            </div>
+
+            <footer>健身营养智能工具© 2025 · 健身(凯门)</footer>
+        </div>
+    </div>
+
+    <script>
+        // 页面导航功能
+        function selectTool(tool) {
+            document.getElementById('home-page').style.display = 'none';
+            
+            if (tool === 'kings-cycle') {
+                document.getElementById('kings-cycle-tool').style.display = 'block';
+                // 默认激活凯圣王碳循环选项卡
+                document.querySelector('.tab-btn[data-tab="kings-cycle"]').click();
+            } else if (tool === 'orange-carb') {
+                document.getElementById('kings-cycle-tool').style.display = 'block';
+                // 激活橙子碳水渐降选项卡
+                document.querySelector('.tab-btn[data-tab="orange-carb"]').click();
+            }else if (tool === 'bulk-plan') {
+    document.getElementById('kings-cycle-tool').style.display = 'block';
+    // 首次进入时动态创建增肌页签
+
+    document.querySelector('.tab-btn[data-tab="bulk-plan"]').click();
+}
+        }
+        
+        function backToHome() {
+            document.getElementById('kings-cycle-tool').style.display = 'none';
+            document.getElementById('home-page').style.display = 'block';
+        }
+        
+        /* ---------- 通用工具函数 ---------- */
+        const $ = id => document.getElementById(id)
+
+        // 选项卡切换功能
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                // 移除所有活动状态
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'))
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'))
+                
+                // 添加当前活动状态
+                btn.classList.add('active')
+                $(btn.dataset.tab).classList.add('active')
+            })
+        })
+
+        /* ---------- 凯圣王碳循环功能 ---------- */
+        // 胚型选择
+        const bodyCards = [...document.querySelectorAll('.body-type-card')]
+        bodyCards.forEach(c => c.addEventListener('click', () => {
+            bodyCards.forEach(x => x.classList.remove('selected'))
+            c.classList.add('selected')
+            setMacros(c.dataset.type)
+        }))
+        function setMacros(type){
+            const map = {ectomorph:{c:3,p:1.3,f:1.1},mesomorph:{c:2.5,p:1.3,f:0.9},endomorph:{c:2,p:1.3,f:0.8}}
+            $('carbsPerKg').value = map[type].c
+            $('proteinPerKg').value = map[type].p
+            $('fatPerKg').value = map[type].f
+            calcKingsCycle()
+        }
+
+        // 显示/隐藏自定义输入
+        const planCards = [...document.querySelectorAll('.plan-card')]
+        const customDiv = $('customPlan')
+        planCards.forEach(c => c.addEventListener('click', () => {
+            planCards.forEach(x => x.classList.remove('selected'))
+            c.classList.add('selected')
+            customDiv.style.display = c.dataset.plan === 'custom' ? 'flex' : 'none'
+            calcKingsCycle()
+        }))
+
+        // 训练部位生成
+        function buildParts(plan){
+            switch(plan){
+                case '1': return ['休息','胸+三头','休息','背+二头','休息','腿+肩','休息']
+                case '2': return ['胸+三头','背+二头','休息','腿+肩','胸+三头','休息','背+二头']
+                case '3': return ['胸+三头','背+二头','腿+肩','休息','胸+三头','背+二头','腿+肩']
+                case '4': return ['胸+三头','背+二头','腿+肩','胸+三头','休息','背+二头','腿+肩']
+                case 'custom':
+                    return ['mon','tue','wed','thu','fri','sat','sun'].map(d=>$(`cus-${d}`).value.trim()||'休息')
+            }
+        }
+
+        // 碳水平映射生成（根据训练计划）
+       // 凯圣王碳循环专用：写死碳日分布
+function buildCarbMap(plan, parts) {
+  // 四种固定模板，顺序对应周一→周日
+  const fixedMap = {
+    '1': ['低','高','中','中','低','高','中'],   // 练1休1
+    '2': ['高','中','低','高','中','低','中'],   // 练2休1
+    '3': ['中','中','高','低','中','低','高'],   // 练3休1
+    '4': ['中','低','高','中','低','中','高']    // 练4休1
+  };
+
+  // 如果是自定义计划，仍用回原来的随机逻辑（或你自己再补一个模板）
+  if (plan === 'custom') {
+    return oldRandomCarbMap(plan, parts); // 保留原逻辑，可选
+  }
+
+  // 返回写死的模板
+  return fixedMap[plan] || fixedMap['1']; // 防呆默认值
+}
+
+/* ---------- 可选：保留原来的随机逻辑，供自定义计划使用 ---------- */
+function oldRandomCarbMap(plan, parts) {
+  const isRestDay = parts.map(p => p === '休息');
+  const carbPatterns = [
+    ['高','中','低','高','中','低','中'],
+    ['高','低','中','高','低','中','中'],
+    ['中','高','低','中','高','低','中'],
+    ['中','低','高','中','低','高','中'],
+    ['低','高','中','低','高','中','中'],
+    ['低','中','高','低','中','高','中'],
+    ['中','中','高','低','中','高','低']
+  ];
+  const valid = carbPatterns.filter(pat => {
+    if (pat.filter(d => d === '高').length !== 2) return false;
+    if (pat.filter(d => d === '中').length !== 3) return false;
+    if (pat.filter(d => d === '低').length !== 2) return false;
+    // 高碳日不能落在休息日
+    for (let i = 0; i < 7; i++) if (pat[i] === '高' && isRestDay[i]) return false;
+    return true;
+  });
+  if (valid.length) return valid[0];
+  // 兜底
+  return ['中','高','低','中','低','高','中'];
+}
+
+        // 凯圣王碳循环主计算
+        function calcKingsCycle(){
+            const w=+$('weight').value,h=+$('height').value,a=+$('age').value,g=$('gender').value
+            const targetW = +$('targetWeight').value
+            if(!w||!h||!a||!targetW){alert('请补全信息');return}
+            const cp=+$('carbsPerKg').value,pp=+$('proteinPerKg').value,fp=+$('fatPerKg').value
+            const plan=document.querySelector('.plan-card.selected').dataset.plan
+
+            const bmr=g==='male'?10*w+6.25*h-5*a+5:10*w+6.25*h-5*a-161
+            const tdee=bmr+500
+            const pro=Math.round(pp*targetW)
+            const weekC=Math.round(cp*targetW*7)
+            const weekF=Math.round(fp*targetW*7)
+            const hc=Math.round(weekC*.5/2)
+            const mc=Math.round(weekC*.35/3)
+            const lc=Math.round(weekC*.15/2)
+            const hf=Math.round(weekF*.15/2)
+            const mf=Math.round(weekF*.35/3)
+            const lf=Math.round(weekF*.50/2)
+
+            $('bmrValue').textContent=Math.round(bmr)
+            $('tdeeValue').textContent=Math.round(tdee)
+            $('proteinValue').textContent=pro
+            $('carbsValue').textContent=weekC
+
+            const parts=buildParts(plan)
+            const carbMap=buildCarbMap(plan, parts)
+            const dayKeys=['mon','tue','wed','thu','fri','sat','sun']
+            const carbNum=dayKeys.map((_,i)=>{
+                switch(carbMap[i]){
+                    case '高':return hc
+                    case '中':return mc
+                    case '低':return lc
+                }
+            })
+            const fats=dayKeys.map((_,i)=>{
+                switch(carbMap[i]){
+                    case '高':return hf
+                    case '中':return mf
+                    case '低':return lf
+                }
+            })
+
+            const trParts=document.querySelector('#planTable tbody tr:nth-child(1)')
+            const trLevel=document.querySelector('#carbLevelRow')
+            parts.forEach((p,i)=>{
+                trParts.children[i+1].textContent=p
+                trLevel.children[i].className=carbMap[i]==='高'?'high':(carbMap[i]==='中'?'med':'low')
+                trLevel.children[i].textContent=carbMap[i]
+            })
+
+            const dailyDiffs=[]
+            dayKeys.forEach((d,i)=>{
+                $(`carb-${d}`).textContent=carbNum[i]
+                $(`protein-${d}`).textContent=pro
+                $(`fat-${d}`).textContent=fats[i]
+                const cal=carbNum[i]*4+pro*4+fats[i]*9
+                $(`cal-${d}`).textContent=cal
+                const diff=Math.round(cal - tdee)
+                dailyDiffs.push(diff)
+                $(`diff-${d}`).innerHTML=`<span style="color:${diff>0?(diff>300?'#10b981':'#f59e0b'):'#f43f5e'}">${diff>0?'+':''}${diff}</span>`
+            })
+
+            const weightDiff = targetW - w
+            const weeklyCalorieDiff = dailyDiffs.reduce((sum, diff) => sum + diff, 0)
+            let daysNeeded = 0
+            let targetDateText = ''
+            if (weightDiff > 0 && weeklyCalorieDiff < 0) {
+                targetDateText = '无法完成，请增加碳水'
+            } else if (weightDiff < 0 && weeklyCalorieDiff > 0) {
+                targetDateText = '无法完成，请减少碳水'
+            } else if (weeklyCalorieDiff === 0) {
+                targetDateText = '热量平衡，请调整计划'
+            } else {
+                daysNeeded = Math.abs(Math.round((weightDiff * 7700) / (weeklyCalorieDiff / 7)))
+                const today = new Date()
+                const targetDate = new Date(today)
+                targetDate.setDate(today.getDate() + daysNeeded)
+                targetDateText = targetDate.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' })
+            }
+            $('weightDiffValue').textContent = weightDiff > 0 ? `+${weightDiff}` : weightDiff
+            $('weightDiffValue').style.color = weightDiff > 0 ? '#10b981' : (weightDiff < 0 ? '#f43f5e' : '#334155')
+            $('weeklyCalorieDiffValue').textContent = weeklyCalorieDiff > 0 ? `+${weeklyCalorieDiff}` : weeklyCalorieDiff
+            $('weeklyCalorieDiffValue').style.color = weeklyCalorieDiff > 0 ? '#10b981' : (weeklyCalorieDiff < 0 ? '#f43f5e' : '#334155')
+            $('daysNeededValue').textContent = daysNeeded || '—'
+            $('targetDate').textContent = targetDateText
+        }
+
+        // 凯圣王碳循环导出 & 重置
+        function dlKingsCycle() {
+            const w   = +$('weight').value;
+            const tgt = +$('targetWeight').value;
+            const h   = +$('height').value;
+            const a   = +$('age').value;
+            const g   = $('gender').value === 'male' ? '男' : '女';
+            const bmr = +$('bmrValue').textContent;
+            const tdee= +$('tdeeValue').textContent;
+            const pro = +$('proteinValue').textContent;
+            const weekCarb = +$('carbsValue').textContent;
+            const weightDiff  = +$('weightDiffValue').textContent;
+            const weekDiffKcal= +$('weeklyCalorieDiffValue').textContent;
+            const daysNeed    = $('daysNeededValue').textContent;
+            const finishDate  = $('targetDate').textContent;
+
+            const basicRows = [
+                ['基础信息','','','','','','',''],
+                ['当前体重(kg)', w,'','','','','',''],
+                ['目标体重(kg)', tgt,'','','','','',''],
+                ['身高(cm)', h,'','','','','',''],
+                ['年龄(岁)', a,'','','','','',''],
+                ['性别', g,'','','','','',''],
+                ['基础代谢(kcal)', bmr,'','','','','',''],
+                ['每日总消耗(kcal)', tdee,'','','','','',''],
+                ['每日蛋白(g)', pro,'','','','','',''],
+                ['每周碳水(g)', weekCarb,'','','','','',''],
+                ['','','','','','','',''],
+                ['目标分析','','','','','','',''],
+                ['体重差(kg)', weightDiff,'','','','','',''],
+                ['周热量差(kcal)', weekDiffKcal,'','','','','',''],
+                ['预计天数', daysNeed,'','','','','',''],
+                ['预计完成日期', finishDate,'','','','','',''],
+                ['','','','','','','','']
+            ];
+
+            const thead = ['项目','周一','周二','周三','周四','周五','周六','周日'];
+            const planRows = [thead];
+            const parts = Array.from(document.querySelectorAll('#planTable tbody tr:nth-child(1) td')).slice(1).map(td=>td.textContent);
+            planRows.push(['训练部位', ...parts]);
+            const levels = Array.from(document.querySelectorAll('#carbLevelRow th')).map(th=>th.textContent);
+            planRows.push(['碳水平', ...levels]);
+            const labels = ['碳水(g)','蛋白质(g)','脂肪(g)','热量(kcal)','缺口/盈余(kcal)'];
+            [2,3,4,5,6].forEach(i=>{
+                const tds = Array.from(document.querySelectorAll(`#planTable tbody tr:nth-child(${i}) td`)).slice(1);
+                planRows.push([labels[i-2], ...tds.map(td=>td.textContent)]);
+            });
+
+            const fullData = [...basicRows, ...planRows];
+            const ws = XLSX.utils.aoa_to_sheet(fullData);
+            const range = XLSX.utils.decode_range(ws['!ref']);
+            for (let R = 0; R <= range.e.r; R++) {
+                for (let C = range.s.c; C <= range.e.c; C++) {
+                    const cell = ws[XLSX.utils.encode_cell({r:R, c:C})];
+                    if (!cell) continue;
+                    cell.s = cell.s || {};
+                    if (R < basicRows.length && C === 0) { cell.s.font = {bold:true}; }
+                    if (R === basicRows.length + 1) {
+                        cell.s.font = {bold:true, color:{rgb:"FFFFFF"}};
+                        cell.s.fill = {fgColor:{rgb:"0284c7"}, patternType:"solid"};
+                    }
+                }
+            }
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, '碳循环完整计划');
+            XLSX.writeFile(wb, `碳循环_${w}kg.xlsx`);
+        }
+
+        function resetKingsCycle(){
+            $('weight').value=75;
+            $('targetWeight').value=70;
+            $('height').value=178;
+            $('age').value=30;
+            $('gender').value='male'
+            bodyCards[0].click()
+            planCards[0].click()
+            ;['mon','tue','wed','thu','fri','sat','sun'].forEach(d=>$(`cus-${d}`).value='')
+            calcKingsCycle()
+        }
+
+        function clipTargetWeight(){
+            const w   = +$('weight').value;
+            const tgt = $('targetWeight');
+            let v = +tgt.value;
+            v = Math.min(Math.max(v, w - 5), w + 5);
+            if(v !== +tgt.value) tgt.value = v;
+        }
+
+        function adjustTarget(delta){
+            const el = $('targetWeight');
+            let v = +el.value + delta;
+            const w = +$('weight').value;
+            v = Math.min(Math.max(v, w - 5), w + 5);
+            el.value = v;
+            clipTargetWeight();
+        }
+/* ========= 增肌计划功能 ========= */
+const bulkPalCards  = [...document.querySelectorAll('#pal-cards .bulk-level-card')];
+const bulkExpCards  = [...document.querySelectorAll('#exp-cards .bulk-level-card')];
+const bulkSurCards  = [...document.querySelectorAll('#surplus-cards .bulk-level-card')];
+
+function selectBulkCard(list, target){
+    list.forEach(c=>c.classList.remove('selected'));
+    target.classList.add('selected');
+    calcBulk();
+}
+bulkPalCards.forEach(c=>c.addEventListener('click',()=>selectBulkCard(bulkPalCards,c)));
+bulkExpCards.forEach(c=>c.addEventListener('click',()=>selectBulkCard(bulkExpCards,c)));
+bulkSurCards.forEach(c=>c.addEventListener('click',()=>selectBulkCard(bulkSurCards,c)));
+/* ========= 增肌计划新增代码 ========= */
+const bulkPlanCards = [...document.querySelectorAll('#bulk-plan-cards .plan-card')];
+const bulkCustomDiv = $('bulk-custom-plan');
+bulkPlanCards.forEach(c => c.addEventListener('click', () => {
+  bulkPlanCards.forEach(x => x.classList.remove('selected'));
+  c.classList.add('selected');
+  bulkCustomDiv.style.display = c.dataset.plan === 'custom' ? 'flex' : 'none';
+  calcBulk();
+}));
+
+function buildBulkParts(plan){
+  switch(plan){
+    case '1': return ['休息','胸+三头','休息','背+二头','休息','腿+肩','休息'];
+    case '2': return ['胸+三头','背+二头','休息','腿+肩','胸+三头','休息','背+二头'];
+    case '3': return ['胸+三头','背+二头','腿+肩','休息','胸+三头','背+二头','腿+肩'];
+    case '4': return ['胸+三头','背+二头','腿+肩','胸+三头','休息','背+二头','腿+肩'];
+    case 'custom':
+      return ['mon','tue','wed','thu','fri','sat','sun'].map(d=>$(`bulk-cus-${d}`).value.trim()||'休息');
+  }
+}
+
+const dayCN = ['周一','周二','周三','周四','周五','周六','周日'];
+function calcBulk(){
+  const w = +$('bulk-weight').value,
+        h = +$('bulk-height').value,
+        a = +$('bulk-age').value,
+        g = $('bulk-gender').value,
+        pal  = +document.querySelector('#pal-cards .selected').dataset.pal,
+        exp  = document.querySelector('#exp-cards .selected').dataset.exp,
+        sur  = +document.querySelector('#surplus-cards .selected').dataset.surplus;
+
+  const bmr = g==='male' ? 10*w+6.25*h-5*a+5 : 10*w+6.25*h-5*a-161;
+  const tdee = Math.round(bmr * pal);
+  const target = tdee + sur;
+
+/* =========  经验系数表 ========= */
+const proMap = {novice: 1.6, intermediate: 1.8, advanced: 2.0};
+const fatMap = {novice: 0.9, intermediate: 1.0, advanced: 1.0};
+const carbMap= {novice: 3.5, intermediate: 4.5, advanced: 5.0};
+
+/* =========  先按体重给固定克数 ========= */
+const pro  = Math.round(w * proMap[exp]);
+const fat  = Math.round(w * fatMap[exp]);
+let carb = Math.round(w * carbMap[exp]);
+
+/* =========  把盈余热量全部追加给碳水 ========= */
+const proKcal = pro * 4, fatKcal = fat * 9, carbKcal = carb * 4;
+const leftKcal = target - (proKcal + fatKcal + carbKcal);
+if (leftKcal > 0) carb += Math.round(leftKcal / 4);
+
+/* =========  训练日 / 休息日浮动 ========= */
+const trainCarb = Math.round(carb * 1);
+const restCarb  = Math.round(carb * 0.85);
+
+$('bulk-bmr').textContent   = bmr + ' kcal';
+$('bulk-tdee').textContent  = tdee + ' kcal';
+$('bulk-target').textContent= target + ' kcal';
+$('bulk-protein').textContent= pro + ' g';
+$('bulk-carb-display').textContent = trainCarb + ' g';
+$('bulk-fat-display').textContent = fat + ' g';
+$('bulk-rest-carb-display').textContent = restCarb + ' g';
+
+  const plan = document.querySelector('#bulk-plan-cards .plan-card.selected').dataset.plan;
+  const parts = buildBulkParts(plan);
+  // 1. 训练部位
+const trParts = document.querySelectorAll('#bulk-week-table tbody tr')[0];
+parts.forEach((part, i) => {
+  trParts.children[i + 1].textContent = part;
+});
+
+// 2. 营养素 & 热量
+const dayCarbs = [], dayCals = [];
+for (let i = 0; i < 7; i++) {
+  const isRest = parts[i] === '休息';
+  const c      = isRest ? restCarb : trainCarb;
+  const cal    = c * 4 + pro * 4 + fat * 9;
+  dayCarbs.push(c);
+  dayCals.push(cal);
+  $(`bulk-carb-${i}`).textContent = c;
+  $(`bulk-pro-${i}`).textContent  = pro;
+  $(`bulk-fat-${i}`).textContent  = fat;
+  $(`bulk-cal-${i}`).textContent  = cal;
+  const diff = cal - tdee;
+  $(`bulk-diff-${i}`).innerHTML =
+    `<span style="color:${diff>0?'#10b981':'#f43f5e'}">${diff>0?'+':''}${diff}</span>`
+}
+/* ===== 预计每周增重 =====
+   7700 kcal ≈ 1 kg 体重；一周总盈余 ÷ 7700 */
+/* ===== 预计每周增重 =====
+   7700 kcal ≈ 1 kg 体重；一周总盈余 ÷ 7700 */
+// 计算一周总摄入
+const weeklyIntake = dayCals.reduce((sum, cal) => sum + cal, 0);
+// 计算一周总消耗
+const weeklyExpenditure = tdee * 7;
+// 计算一周总盈余
+const weeklySurplus = weeklyIntake - weeklyExpenditure;
+const weeklyGain = (weeklySurplus / 7700).toFixed(2);
+$('bulk-weekly-gain').textContent = weeklyGain;
+/* ---------- 计算逻辑详情 ---------- */
+const logicHtml = `
+  <div class="bulk-logic" style="margin-top:12px;font-size:.75rem;color:#475569;line-height:1.6;">
+    <b>计算逻辑：</b><br>
+    1) BMR = ${g==='male'?10*w+6.25*h-5*a+5:10*w+6.25*h-5*a-161} kcal（Mifflin-St Jeor）<br>
+    2) TDEE = BMR × ${pal} = ${tdee} kcal（运动系数）<br>
+    3) 目标热量 = TDEE + ${sur} = ${target} kcal<br>
+    4) 蛋白质 = 体重 × ${exp==='novice'?1.6:exp==='intermediate'?1.8:2.0} = ${pro} g<br>
+    5) 脂肪 = 体重 ×${fatMap[exp]} = ${fat} g<br>
+    6) 训练日碳水 =体重×${carbMap[exp]} g/kg + 盈余热量(若有)÷4 = ${trainCarb} g<br>
+    7) 休息日碳水 =（剩余热量 ÷ 4）*0.85  =  ${restCarb} g
+  </div>
+`;
+/* 如果已存在先清空再写入，避免重复 */
+let oldBox = document.getElementById('bulk-logic-box');
+if(oldBox) oldBox.remove();
+document.querySelector('.bulk-stats').insertAdjacentHTML('afterend',
+  `<div id="bulk-logic-box">${logicHtml}</div>`);
+}
+
+function editBulkCell(cell){
+  const old = cell.textContent;
+  cell.innerHTML = `<input style="width:100%;font-size:.75rem" value="${old}">`;
+  const inp = cell.querySelector('input');
+  inp.focus();
+  inp.onblur = inp.onkeydown = e => {
+    if(e.type==='blur'||e.key==='Enter') cell.textContent = inp.value||old;
+  };
+}
+
+/* ========= 替换掉原来的 dlBulk() ========= */
+function dlBulk() {
+  // 1. 重新抓取并计算一次，确保所有变量存在
+  calcBulk();   // 先算一遍
+
+  const w   = +$('bulk-weight').value;
+  const h   = +$('bulk-height').value;
+  const a   = +$('bulk-age').value;
+  const g   = $('bulk-gender').value;
+  const pal = +document.querySelector('#pal-cards .selected').dataset.pal;
+  const exp = document.querySelector('#exp-cards .selected').dataset.exp;
+  const sur = +document.querySelector('#surplus-cards .selected').dataset.surplus;
+
+  // 2. 从页面上把已经算好的数值拿下来
+  const bmr   = +$('bulk-bmr').textContent.replace(' kcal','');
+  const tdee  = +$('bulk-tdee').textContent.replace(' kcal','');
+  const target= +$('bulk-target').textContent.replace(' kcal','');
+  const pro   = +$('bulk-protein').textContent.replace(' g','');
+  const fat   = +$('bulk-fat-display').textContent.replace(' g','');
+  const trainCarb = +$('bulk-carb-display').textContent.replace(' g','');
+  const restCarb  = +$('bulk-rest-carb-display').textContent.replace(' g','');
+ const weeklyGain = $('bulk-weekly-gain').textContent; // 新增：获取预计每周增重
+  // 3. 经验系数表（与 calcBulk 保持一致）
+  const proMap = {novice: 1.6, intermediate: 1.8, advanced: 2.0};
+  const fatMap = {novice: 0.9, intermediate: 1.0, advanced: 1.0};
+  const carbMap= {novice: 3.5, intermediate: 4.5, advanced: 5.0};
+
+  /* ---------- 基础信息 + 计算过程 ---------- */
+  const basic = [
+    ['增肌计划导出'],
+    ['体重(kg)', w],
+    ['身高(cm)', h],
+    ['年龄(岁)', a],
+    ['性别', g==='male'?'男':'女'],
+    ['运动系数', pal],
+    ['每日盈余(kcal)', sur],
+    [],['计算过程'],
+    ['基础代谢(BMR)', `${bmr} kcal`],
+    ['每日总消耗(TDEE)', `${tdee} kcal`],
+    ['目标热量', `${target} kcal`],
+    ['预计每周增重', `${weeklyGain} kg`], // 新增：每周增重数据
+    [`蛋白质 (${proMap[exp]} g/kg)`, `${pro} g`],
+    [`脂肪 (${fatMap[exp]} g/kg)`, `${fat} g`],
+    [`训练日碳水 (体重×${carbMap[exp]} + 盈余÷4)`, `${trainCarb} g`],
+    [`休息日碳水 (训练日×0.85)`, `${restCarb} g`],
+    [],['一周明细']
+  ];
+
+  /* ---------- 一周计划表 ---------- */
+  const plan = [
+    ['项目','周一','周二','周三','周四','周五','周六','周日']
+  ];
+  const tbody = document.querySelectorAll('#bulk-week-table tbody tr');
+  tbody.forEach(tr=>{
+    plan.push(Array.from(tr.children).map(td=>td.textContent));
+  });
+
+  const data = [...basic, ...plan];
+  const ws = XLSX.utils.aoa_to_sheet(data);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, '增肌计划');
+  XLSX.writeFile(wb, `增肌_${w}kg.xlsx`);
+}
+
+function resetBulk(){
+  $('bulk-weight').value = 70;
+  $('bulk-height').value = 175;
+  $('bulk-age').value = 25;
+  $('bulk-gender').value = 'male';
+  document.querySelector('#pal-cards .bulk-level-card').click();
+  document.querySelector('#exp-cards .bulk-level-card').click();
+  document.querySelector('#surplus-cards .bulk-level-card').click();
+  bulkPlanCards[0].click();
+  ['mon','tue','wed','thu','fri','sat','sun'].forEach(d=>$(`bulk-cus-${d}`).value='');
+  calcBulk();
+}
+
+$('bulk-calc').addEventListener('click', calcBulk);
+$('bulk-reset').addEventListener('click', resetBulk);
+$('bulk-dl').addEventListener('click', dlBulk);
+        /* ---------- 橙子碳水渐降功能 ---------- */
+        // 营养素比例选择
+        const ratioCards = [...document.querySelectorAll('.orange-ratio-card')]
+        ratioCards.forEach(c => c.addEventListener('click', () => {
+            ratioCards.forEach(x => x.classList.remove('selected'))
+            c.classList.add('selected')
+            
+            // 显示/隐藏自定义比例输入
+            const customInputs = $('custom-ratio-inputs')
+            customInputs.style.display = c.dataset.ratio === 'custom' ? 'block' : 'none'
+            
+            calcOrangeCarb()
+        }))
+
+        // 自定义比例输入验证
+        function validateCustomRatio() {
+            const carb = +$('custom-carb').value || 0
+            const protein = +$('custom-protein').value || 0
+            const fat = +$('custom-fat').value || 0
+            const total = carb + protein + fat
+            
+            const ratioSum = $('ratio-sum')
+            ratioSum.textContent = `总和: ${total}%`
+            
+            if (total !== 100) {
+                ratioSum.classList.add('error')
+                return false
+            } else {
+                ratioSum.classList.remove('error')
+                return true
+            }
+        }
+
+        // 监听自定义比例输入变化
+        document.querySelectorAll('#custom-carb, #custom-protein, #custom-fat').forEach(input => {
+            input.addEventListener('input', () => {
+                validateCustomRatio()
+                calcOrangeCarb()
+            })
+        })
+
+        // 减重百分比滑块
+        const weightLossSlider = $('weight-loss-percent')
+        const weightLossValue = $('weight-loss-value')
+        
+        weightLossSlider.addEventListener('input', () => {
+            weightLossValue.textContent = `${weightLossSlider.value}%`
+            calcOrangeCarb()
+        })
+
+        // 橙子碳水渐降主计算
+        function calcOrangeCarb(){
+            const w = +$('orange-weight').value
+            const h = +$('orange-height').value
+            const a = +$('orange-age').value
+            const g = $('orange-gender').value
+            const trainTime = +$('train-time').value
+            const intensity = +$('train-intensity').value
+            const weightLossPercent = +weightLossSlider.value / 100 // 转换为小数
+            const weeklyLossPercent = weightLossPercent / 4.33; 
+            // 获取选中的比例
+            const selectedRatio = document.querySelector('.orange-ratio-card.selected').dataset.ratio
+            let carbRatio, proteinRatio, fatRatio
+            
+            if(selectedRatio === 'custom') {
+                if (!validateCustomRatio()) return
+                carbRatio = (+$('custom-carb').value || 0) / 100
+                proteinRatio = (+$('custom-protein').value || 0) / 100
+                fatRatio = (+$('custom-fat').value || 0) / 100
+            } else if(selectedRatio === '532') {
+                carbRatio = 0.5
+                proteinRatio = 0.3
+                fatRatio = 0.2
+            } else {
+                carbRatio = 0.4
+                proteinRatio = 0.4
+                fatRatio = 0.2
+            }
+            
+            if(!w || !h || !a || !trainTime){alert('请补全信息');return}
+            
+            // 计算BMR
+            const bmr = g === 'male' ? 10*w + 6.25*h - 5*a + 5 : 10*w + 6.25*h - 5*a - 161
+            
+            // 计算训练消耗热量
+            const trainCalories = trainTime * intensity
+            
+            // 计算TDEE
+            const tdee = Math.round(bmr + trainCalories)
+            
+            // 计算初始碳水
+            const initialCarbs = Math.round(tdee * carbRatio / 4)
+            
+            // 计算蛋白质和脂肪
+            const protein = Math.round(tdee * proteinRatio / 4)
+            const fat = Math.round(tdee * fatRatio / 9)
+            
+            // 计算周减重目标 (根据用户设置的百分比)
+            const weeklyLoss = Math.round(w * weeklyLossPercent * 100) / 100
+            
+            // 计算预计周数和完成日期
+            const targetWeightLoss = w * 0.15 // 假设目标减重15%
+            const estimatedWeeks = Math.round(targetWeightLoss / weeklyLoss)
+            const today = new Date()
+            const targetDate = new Date(today)
+            targetDate.setDate(today.getDate() + estimatedWeeks * 7)
+            const formattedDate = targetDate.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' })
+            
+            // 更新显示
+            $('orange-bmrValue').textContent = Math.round(bmr)
+            $('orange-trainCalories').textContent = trainCalories
+            $('orange-tdeeValue').textContent = tdee
+            $('orange-initialCarbs').textContent = initialCarbs
+            $('orange-protein').textContent = protein
+            $('orange-fat').textContent = fat
+            $('orange-weeklyLoss').textContent = weeklyLoss
+            
+            
+            // 生成碳水渐降计划表
+            generateOrangePlan(initialCarbs, protein, fat, weeklyLoss, estimatedWeeks, w)
+        }
+
+        // 生成碳水渐降计划表
+        // 生成碳水渐降计划表（无周数、无日期版）
+function generateOrangePlan(initialCarbs, protein, fat, weeklyLoss, estimatedWeeks, initialWeight) {
+  const planBody = $('orange-planBody');
+  planBody.innerHTML = '';
+
+  let currentCarbs = initialCarbs;
+  const adjustment = 15;               // 每次下调 15 g
+  let seq = 1;                         // 行号从 1 开始
+
+  for (let week = 1; week <= estimatedWeeks + 2; week++) {
+    const expectedWeight = Math.max(initialWeight - (week - 1) * weeklyLoss, initialWeight * 0.85);
+
+    if (currentCarbs < 100) {          // 低于 100 g 停止
+      planBody.insertAdjacentHTML('beforeend', `
+        <tr>
+          <td>${seq++}</td>
+          <td>${currentCarbs}</td>
+          <td>${protein}</td>
+          <td>${fat}</td>
+          <td>${expectedWeight.toFixed(1)}</td>
+          <td>${weeklyLoss}</td>
+          <td>碳水已低于 100 g，建议停止减少</td>
+        </tr>`);
+      break;
+    }
+
+    planBody.insertAdjacentHTML('beforeend', `
+      <tr>
+        <td>${seq++}</td>
+        <td>${currentCarbs}</td>
+        <td>${protein}</td>
+        <td>${fat}</td>
+        <td>${expectedWeight.toFixed(1)}</td>
+        <td>${weeklyLoss}</td>
+        <td>${week === 1 ? '初始碳水摄入' : '如未达目标,减少15g碳水'}</td>
+      </tr>`);
+
+    currentCarbs -= adjustment;
+  }
+}
+
+        // 橙子碳水渐降导出功能
+        // 橙子碳水渐降导出功能（修复版）
+function dlOrangeCarb() {
+    const w = +$('orange-weight').value,
+          h = +$('orange-height').value,
+          a = +$('orange-age').value,
+          g = $('orange-gender').value === 'male' ? '男' : '女',
+          trainTime = +$('train-time').value,
+          intensity = +$('train-intensity').value,
+          weightLossPercent = +$('weight-loss-percent').value;
+
+    const ratioCard = document.querySelector('.orange-ratio-card.selected'),
+          ratioText = ratioCard.dataset.ratio === 'custom'
+              ? `自定义: ${$('custom-carb').value}%碳水, ${$('custom-protein').value}%蛋白, ${$('custom-fat').value}%脂肪`
+              : ratioCard.dataset.ratio === '532'
+                  ? '50%碳水 30%蛋白 20%脂肪'
+                  : '40%碳水 40%蛋白 20%脂肪';
+
+    const bmr = +$('orange-bmrValue').textContent,
+          trainCal = +$('orange-trainCalories').textContent,
+          tdee = +$('orange-tdeeValue').textContent,
+          initCarb = +$('orange-initialCarbs').textContent,
+          protein = +$('orange-protein').textContent,
+          fat = +$('orange-fat').textContent,
+          weeklyLoss = +$('orange-weeklyLoss').textContent;
+
+    /* ---------- 基础信息部分 ---------- */
+    const basic = [
+        ['基础信息','','','','','','',''],
+        ['当前体重(kg)', w],
+        ['身高(cm)', h],
+        ['年龄(岁)', a],
+        ['性别', g],
+        ['训练时长(分钟)', trainTime],
+        ['训练强度系数', intensity],
+        ['每月减重百分比', `${weightLossPercent}%`],
+        ['营养素比例', ratioText],
+        [], [],
+        ['计算结果'],
+        ['基础代谢(BMR)', bmr],
+        ['训练消耗热量', trainCal],
+        ['每日总消耗(TDEE)', tdee],
+        ['初始碳水(g)', initCarb],
+        ['蛋白质(g)', protein],
+        ['脂肪(g)', fat],
+        ['周减重目标(kg)', weeklyLoss],
+        [], []
+    ];
+
+    /* ---------- 计划表部分 ---------- */
+    const plan = [
+        ['碳水渐降计划'],
+        ['周数','每日碳水(g)','每日蛋白质(g)','每日脂肪(g)','预期体重(kg)','周减重目标(kg)','调整说明']
+    ];
+    Array.from($('orange-planBody').querySelectorAll('tr')).forEach(tr => {
+        plan.push(Array.from(tr.querySelectorAll('td')).map(td => td.textContent));
+    });
+
+    const data = [...basic, ...plan];
+    const ws = XLSX.utils.aoa_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, '碳水渐降计划');
+    XLSX.writeFile(wb, `碳水渐降_${w}kg.xlsx`);
+}
+
+        // 橙子碳水渐降重置功能
+        function resetOrangeCarb(){
+            $('orange-weight').value = 80
+            $('orange-height').value = 175
+            $('orange-age').value = 32
+            $('orange-gender').value = 'male'
+            $('train-time').value = 60
+            $('train-intensity').value = 8
+            weightLossSlider.value = 3.5
+            weightLossValue.textContent = '3.5%'
+            ratioCards[0].click()
+            $('custom-carb').value = 50
+            $('custom-protein').value = 30
+            $('custom-fat').value = 20
+            validateCustomRatio()
+            calcOrangeCarb()
+        }
+
+        /* ---------- 事件绑定 ---------- */
+        // 凯圣王碳循环事件
+        $('calculateBtn').addEventListener('click', calcKingsCycle)
+        $('downloadBtn').addEventListener('click', dlKingsCycle)
+        $('resetBtn').addEventListener('click', resetKingsCycle)
+
+        // 橙子碳水渐降事件
+        $('orange-calculateBtn').addEventListener('click', calcOrangeCarb)
+        $('orange-downloadBtn').addEventListener('click', dlOrangeCarb)
+        $('orange-resetBtn').addEventListener('click', resetOrangeCarb)
+
+        // 训练部位单元格双击编辑
+        document.querySelectorAll('.editable').forEach(cell=>{
+            cell.addEventListener('dblclick',()=>{
+                const v=cell.textContent
+                cell.innerHTML=`<input value="${v}" style="width:100%;font-size:.7rem">`
+                const inp=cell.querySelector('input')
+                inp.focus()
+                inp.onblur=inp.onkeydown=e=>{
+                    if(e.type==='blur'||e.key==='Enter'){cell.textContent=inp.value||v}
+                }
+            })
+        })
+	function toggleBodyFatImage() {
+    const container = document.getElementById('bodyfat-container');
+    if (container.style.display === 'none') {
+        container.style.display = 'block';
+    } else {
+        container.style.display = 'none';
+    }
+}
+/* 胚型参考图显隐 */
+function toggleBodyTypeRef() {
+  const box = document.getElementById('bodytype-ref');
+  const link = event.currentTarget;
+  if (box.style.display === 'none') {
+    box.style.display = 'block';
+    link.textContent = '📌 隐藏胚型参考图';
+  } else {
+    box.style.display = 'none';
+    link.textContent = '📌 点击查看胚型参考图';
+  }
+}
+// 页面加载时提前创建增肌计划 tab
+document.addEventListener('DOMContentLoaded', () => {
+    const tabsContainer = document.querySelector('.tabs');
+    if (!document.querySelector('.tab-btn[data-tab="bulk-plan"]')) {
+        const bulkTab = document.createElement('button');
+        bulkTab.className = 'tab-btn';
+        bulkTab.dataset.tab = 'bulk-plan';
+        bulkTab.textContent = '增肌计划';
+        tabsContainer.appendChild(bulkTab);
+
+        bulkTab.addEventListener('click', () => {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            bulkTab.classList.add('active');
+            document.getElementById('bulk-plan').classList.add('active');
+            calcBulk();
+        });
+    }
+});
+        /* ---------- 初始化 ---------- */
+        setMacros('ectomorph')
+        calcKingsCycle();
+        clipTargetWeight();
+        
+        // 初始化橙子碳水渐降
+        weightLossValue.textContent = `${weightLossSlider.value}%`
+        validateCustomRatio()
+        calcOrangeCarb();
+    </script>
+<!-- ========= 1. 全屏水印 ========= -->
+<!-- <script>
+(function(){
+  const canvas = document.createElement('canvas');
+  const ctx    = canvas.getContext('2d');
+  canvas.width = 320;
+  canvas.height = 320;
+  ctx.font = 'bold 20px sans-serif';
+  ctx.fillStyle = 'rgba(60,60,60,0.25)'; // 深灰 35% 不透明度
+  ctx.textAlign = 'center';
+  ctx.translate(160,160);
+  ctx.rotate(-Math.PI/6);
+  ctx.fillText('© 健身,禁止转载/商用',0,0);
+  ctx.rotate(Math.PI/6);
+  const div = document.createElement('div');
+  div.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;z-index:9999;background:url('+canvas.toDataURL()+') repeat';
+  document.body.appendChild(div);
+})();
+</script> -->
+
+<!-- ========= 2. 禁用右键 & 常用开发者快捷键 ========= -->
+<script>
+['contextmenu','keydown'].forEach(function(ev){
+  document.addEventListener(ev,function(e){
+    if(ev==='contextmenu'||
+       (ev==='keydown' && (
+         e.ctrlKey&&e.shiftKey&&(e.key==='I'||e.key==='J') ||
+         e.ctrlKey&&e.key==='U' ||
+         e.key==='F12'
+       ))){
+      e.preventDefault(); return false;
+    }
+  });
+});
+</script>
+
+<!-- ========= 3. 复制时追加版权 ========= -->
+<!-- <script>
+document.addEventListener('copy',function(e){
+  const sel = window.getSelection().toString();
+  if(!sel) return;
+  const copyText = sel + '\n\n© 2025 健身 | 未授权仅限个人使用 | 禁止转载、商用 | 违者必究';
+  e.clipboardData.setData('text/plain', copyText);
+  e.preventDefault();
+});
+</script> -->
+
+<!-- ========= 4. 页面底部固定版权栏 ========= -->
+<style>
+#copyright-bar{
+  position:fixed;
+  left:0;right:0;bottom:0;
+  height:32px;
+  background:#0ea5e9;
+  color:#fff;
+  font-size:13px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:10000;
+  letter-spacing:.5px;
+}
+/* ===== 增肌计划专属样式 ===== */
+.bulk-section{display:none;}
+.bulk-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;}
+.bulk-input-group{flex:1 1 120px;display:flex;flex-direction:column;}
+.bulk-level-cards{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;}
+.bulk-level-card{flex:1 1 130px;border:1px solid #cbd5e1;border-radius:8px;padding:10px;text-align:center;cursor:pointer;transition:.2s;background:#fff;}
+.bulk-level-card.selected{border-color:var(--primary);background:#e0f2fe;}
+.bulk-level-card h4{font-size:.8rem;margin-bottom:4px;color:var(--primary);}
+.bulk-level-card p{font-size:.65rem;margin:0;color:#64748b;}
+.bulk-stats{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}
+.bulk-stat{flex:1 1 120px;background:#f0f9ff;border-radius:8px;padding:10px;text-align:center;}
+.bulk-stat .value{font-size:1.1rem;font-weight:700;color:var(--primary);}
+.bulk-stat .label{font-size:.7rem;color:#64748b;}
+/* 让增肌计划里的 plan-cards 与碳循环保持一致 */
+#bulk-plan-cards{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;}
+#bulk-plan-cards .plan-card{flex:1 1 80px;}
+</style>
+<div id="copyright-bar">
+  © 2025 健身营养智能工具
+</div>
+</body>
+</html>
