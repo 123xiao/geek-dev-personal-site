@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MyBatis SQL日志格式化工具</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
-    
-    <!-- 配置Tailwind自定义颜色和字体 -->
+
     <script>
         tailwind.config = {
             theme: {
@@ -18,13 +18,13 @@
                         dark: '#1E293B',
                         light: '#F8FAFC',
                         sql: {
-                            keyword: '#0000FF',
+                            keyword: '#097bf7',
                             string: '#008000',
-                            number: '#800000',
+                            number: '#00c853',
                             function: '#C25600',
                             comment: '#008000',
                             parameter: '#AA70EE',
-                            replaced: '#D97706'
+                            replaced: '#00c853'
                         }
                     },
                     fontFamily: {
@@ -34,7 +34,7 @@
             }
         }
     </script>
-    
+
     <style type="text/tailwindcss">
         @layer utilities {
             .content-auto {
@@ -42,7 +42,6 @@
             }
             .log-container {
                 @apply bg-dark text-light rounded-lg p-4 overflow-auto font-mono text-sm;
-                max-height: 400px;
             }
             .sql-keyword {
                 @apply text-sql-keyword font-semibold;
@@ -75,9 +74,9 @@
         }
     </style>
 </head>
+
 <body class="bg-gray-100 min-h-screen">
     <div class="container mx-auto px-4 py-8 max-w-6xl">
-        <!-- 标题区域 -->
         <header class="text-center mb-8 fade-in">
             <h1 class="text-[clamp(1.8rem,4vw,2.5rem)] font-bold text-dark mb-2">
                 <i class="fa fa-database mr-3 text-primary"></i>MyBatis SQL日志格式化工具
@@ -86,10 +85,8 @@
                 粘贴MyBatis生成的SQL日志，一键格式化，支持参数替换，让SQL语句更清晰易读
             </p>
         </header>
-        
-        <!-- 主要内容区域 -->
+
         <main class="grid md:grid-cols-1 gap-8">
-            <!-- 输入区域 -->
             <section class="bg-white rounded-xl shadow-lg p-6 transition-all duration-300 hover:shadow-xl">
                 <div class="flex justify-between items-center mb-4">
                     <h2 class="text-xl font-semibold text-gray-800">
@@ -99,25 +96,21 @@
                         <i class="fa fa-trash-o"></i> 清空
                     </button>
                 </div>
-                <textarea 
-                    id="logInput" 
+                <textarea id="logInput"
                     class="w-full h-64 p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all font-mono text-sm resize-none"
                     placeholder="粘贴MyBatis日志内容到这里..."></textarea>
                 <div class="mt-4 flex flex-wrap gap-3">
-                    <button 
-                        id="formatBtn" 
+                    <button id="formatBtn"
                         class="bg-primary hover:bg-primary/90 text-white px-6 py-2 rounded-lg transition-all flex items-center font-medium shadow-md hover:shadow-lg">
                         <i class="fa fa-magic mr-2"></i> 格式化日志
                     </button>
-                    <button 
-                        id="loadSampleBtn" 
+                    <button id="loadSampleBtn"
                         class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-6 py-2 rounded-lg transition-all flex items-center font-medium">
                         <i class="fa fa-file-text-o mr-2"></i> 加载示例
                     </button>
                 </div>
             </section>
-            
-            <!-- 输出区域 -->
+
             <section class="bg-white rounded-xl shadow-lg p-6 transition-all duration-300 hover:shadow-xl">
                 <div class="flex justify-between items-center mb-4">
                     <h2 class="text-xl font-semibold text-gray-800">
@@ -133,52 +126,46 @@
                     </div>
                 </div>
                 <div id="formatResult" class="hidden">
-                    <!-- 原始SQL语句部分（带占位符） -->
                     <div class="mb-6">
                         <h3 class="text-lg font-medium text-gray-700 mb-2">
                             <i class="fa fa-search mr-2 text-primary"></i>原始SQL语句（带占位符）
                         </h3>
-                        <div id="originalSql" class="log-container"></div>
+                        <div id="originalSql" class="log-container max-h-[400px]"></div>
                     </div>
-                    
-                    <!-- 参数替换后的SQL -->
+
                     <div class="mb-6">
                         <h3 class="text-lg font-medium text-gray-700 mb-2">
                             <i class="fa fa-search-plus mr-2 text-secondary"></i>参数替换后的SQL（可执行）
                         </h3>
                         <div id="replacedSql" class="log-container"></div>
                     </div>
-                    
-                    <!-- 参数部分 -->
+
                     <div>
                         <h3 class="text-lg font-medium text-gray-700 mb-2">
                             <i class="fa fa-list-ul mr-2 text-secondary"></i>参数列表
                         </h3>
-                        <div id="formattedParams" class="log-container"></div>
+                        <div id="formattedParams" class="log-container max-h-[400px]"></div>
                     </div>
                 </div>
-                
-                <!-- 初始提示 -->
+
                 <div id="initialMessage" class="text-center py-16 text-gray-500">
                     <i class="fa fa-info-circle text-4xl mb-4 opacity-30"></i>
                     <p>格式化后的结果将显示在这里</p>
                 </div>
-                
-                <!-- 错误提示 -->
+
                 <div id="errorMessage" class="hidden text-center py-16 text-red-500">
                     <i class="fa fa-exclamation-circle text-4xl mb-4"></i>
                     <p>无法解析日志内容，请检查输入格式是否正确</p>
                 </div>
             </section>
         </main>
-        
-        <!-- 信息提示 -->
-        <div id="toast" class="fixed bottom-6 right-6 px-6 py-3 rounded-lg shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 flex items-center">
+
+        <div id="toast"
+            class="fixed bottom-6 right-6 px-6 py-3 rounded-lg shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 flex items-center">
             <i id="toastIcon" class="mr-2"></i>
             <span id="toastMessage"></span>
         </div>
-        
-        <!-- 页脚 -->
+
         <footer class="mt-12 text-center text-gray-500 text-sm">
             <p>MyBatis SQL日志格式化工具 &copy; 2025</p>
         </footer>
@@ -211,7 +198,7 @@
             toastMessage.textContent = message;
             toastIcon.className = isSuccess ? 'fa fa-check-circle mr-2 text-green-500' : 'fa fa-exclamation-circle mr-2 text-red-500';
             toast.className = `fixed bottom-6 right-6 px-6 py-3 rounded-lg shadow-lg transform translate-y-0 opacity-100 transition-all duration-300 flex items-center ${isSuccess ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'}`;
-            
+
             setTimeout(() => {
                 toast.className = 'fixed bottom-6 right-6 px-6 py-3 rounded-lg shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 flex items-center';
             }, 3000);
@@ -221,62 +208,60 @@
         function formatSql(sql, highlightParams = true) {
             // 关键字列表（按长度降序排列，避免部分匹配）
             const keywords = [
-                'SELECT', 'INSERT', 'UPDATE', 'DELETE', 'FROM', 'WHERE', 'AND', 'OR', 'IN', 'NOT IN', 
-                'LIKE', 'NOT LIKE', 'IS NULL', 'IS NOT NULL', 'GROUP BY', 'ORDER BY', 'HAVING', 
-                'LIMIT', 'OFFSET', 'JOIN', 'INNER JOIN', 'LEFT JOIN', 'RIGHT JOIN', 'ON', 'AS', 
+                'SELECT', 'INSERT', 'UPDATE', 'DELETE', 'FROM', 'WHERE', 'AND', 'OR', 'IN', 'NOT IN',
+                'LIKE', 'NOT LIKE', 'IS NULL', 'IS NOT NULL', 'GROUP BY', 'ORDER BY', 'HAVING',
+                'LIMIT', 'OFFSET', 'JOIN', 'INNER JOIN', 'LEFT JOIN', 'RIGHT JOIN', 'ON', 'AS',
                 'DISTINCT', 'COUNT', 'SUM', 'AVG', 'MAX', 'MIN', 'VALUES', 'SET', 'BETWEEN', 'NOT'
             ].sort((a, b) => b.length - a.length);
-            
+
             // 函数列表
             const functions = ['COUNT', 'SUM', 'AVG', 'MAX', 'MIN', 'DATE', 'NOW', 'CURRENT_DATE'];
-            
+
             // 转义HTML特殊字符
-            let formatted = sql.replace(/&/g, '&amp;')
-                               .replace(/</g, '&lt;')
-                               .replace(/>/g, '&gt;')
-                               .replace(/"/g, '&quot;')
-                               .replace(/'/g, '&#039;');
-            
+            let formatted = sql
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
+
             // 处理注释
             formatted = formatted.replace(/(--.*?)(\n|$)/g, '<span class="sql-comment">$1</span>$2');
-            
+
             // 处理字符串
             formatted = formatted.replace(/"([^"]*)"/g, '<span class="sql-string">"$1"</span>');
-            formatted = formatted.replace(/'([^']*)'/g, '<span class="sql-string">\'"$1"\'</span>');
-            
+            formatted = formatted.replace(/'([^']*)'/g, '<span class="sql-string">\'$1\'</span>');
+
             // 处理数字
             formatted = formatted.replace(/\b\d+(\.\d+)?\b/g, '<span class="sql-number">$&</span>');
-            
+
             // 处理函数
             functions.forEach(func => {
-                const regex = new RegExp(`\\b${func}\\b`, 'g');
+                const regex = new RegExp(`\\b${func}\\b`, 'gi');
                 formatted = formatted.replace(regex, `<span class="sql-function">${func}</span>`);
             });
-            
+
             // 处理关键字
             keywords.forEach(keyword => {
                 // 确保关键字是独立的单词
-                const regex = new RegExp(`\\b${keyword}\\b`, 'g');
+                const regex = new RegExp(`\\b${keyword}\\b`, 'gi');
                 formatted = formatted.replace(regex, `<span class="sql-keyword">${keyword}</span>`);
             });
-            
+
             // 处理参数占位符
             if (highlightParams) {
                 formatted = formatted.replace(/\?/g, '<span class="sql-parameter">?</span>');
             }
-            
-            // 添加适当的换行
+
+            // 添加适当的换行 (light formatting)
             formatted = formatted.replace(/(<span class="sql-keyword">FROM<\/span>)/g, '\n$1')
-                                 .replace(/(<span class="sql-keyword">WHERE<\/span>)/g, '\n$1')
-                                 .replace(/(<span class="sql-keyword">GROUP BY<\/span>)/g, '\n$1')
-                                 .replace(/(<span class="sql-keyword">ORDER BY<\/span>)/g, '\n$1')
-                                 .replace(/(<span class="sql-keyword">HAVING<\/span>)/g, '\n$1')
-                                 .replace(/(<span class="sql-keyword">JOIN<\/span>)/g, '\n$1')
-                                 .replace(/(<span class="sql-keyword">SET<\/span>)/g, '\n$1')
-                                 .replace(/(<span class="sql-keyword">VALUES<\/span>)/g, '\n$1')
-                                 .replace(/,/g, ', ')
-                                 .replace(/\s+/g, ' '); // 合并多个空格
-            
+                .replace(/(<span class="sql-keyword">WHERE<\/span>)/g, '\n$1')
+                .replace(/(<span class="sql-keyword">GROUP BY<\/span>)/g, '\n$1')
+                .replace(/(<span class="sql-keyword">ORDER BY<\/span>)/g, '\n$1')
+                .replace(/(<span class="sql-keyword">HAVING<\/span>)/g, '\n$1')
+                .replace(/(<span class="sql-keyword">JOIN<\/span>)/g, '\n$1')
+                .replace(/(<span class="sql-keyword">SET<\/span>)/g, '\n$1')
+                .replace(/(<span class="sql-keyword">VALUES<\/span>)/g, '\n$1')
+                .replace(/,/g, ', ');
+
             return formatted;
         }
 
@@ -287,21 +272,59 @@
                 // 提取参数值
                 const match = param.match(/^(.*?)\((.*?)\)$/);
                 const value = match ? match[1] : param;
-                
+
                 // 根据参数类型添加引号
                 const paramType = match ? match[2].toLowerCase() : '';
                 let formattedValue = value;
-                
-                if (paramType.includes('string') || paramType.includes('char') || 
+
+                if (paramType.includes('string') || paramType.includes('char') ||
                     paramType.includes('date') || paramType.includes('time')) {
-                    formattedValue = `'${value}'`;
+                    // 转义单引号并添加外层单引号
+                    formattedValue = `'${value.replace(/'/g, "''")}'`;
                 }
-                
+
                 // 替换第一个问号
                 replacedSql = replacedSql.replace('?', formattedValue);
             });
-            
+
             return replacedSql;
+        }
+
+        // 美化SQL函数 (MODIFIED)
+        function beautifySql(sql) {
+            // 清理多余的空白
+            let formatted = sql.replace(/\s+/g, ' ').trim();
+
+            // 在主要关键字前添加换行
+            const keywords = ['FROM', 'WHERE', 'ORDER BY', 'GROUP BY', 'HAVING', 'LIMIT', 'OFFSET', 'JOIN', 'LEFT JOIN', 'RIGHT JOIN', 'INNER JOIN', 'INSERT INTO', 'VALUES', 'UPDATE', 'SET', 'DELETE'];
+            keywords.forEach(keyword => {
+                const regex = new RegExp(`\\b(${keyword})\\b`, 'gi');
+                formatted = formatted.replace(regex, '\n$1');
+            });
+
+            // 专门处理 SELECT 子句的格式
+            const selectRegex = /^(SELECT(?:\s+DISTINCT)?)(.*?)(\nFROM|\nVALUES|$)/i;
+            if (selectRegex.test(formatted)) {
+                formatted = formatted.replace(selectRegex, (match, select, columns, from) => {
+                    const formattedColumns = columns.trim().split(',')
+                        .map(col => col.trim())
+                        .join(',\n  ');
+                    return `${select.trim()}\n  ${formattedColumns}${from}`;
+                });
+            }
+
+            // 缩进 AND, OR, ON 子句
+            formatted = formatted.replace(/\n\s*(AND|OR|ON)\b/gi, '\n  $1');
+            
+            // 修正 IN 子句中可能存在的错误换行
+            formatted = formatted.replace(/\bIN\s*\([^)]*\)/gi, function(match) {
+                return match.replace(/,\n\s*/g, ', ');
+            });
+
+            // 清理可能产生的多余换行符
+            formatted = formatted.replace(/\n+/g, '\n');
+
+            return formatted.trim();
         }
 
         // 解析并格式化日志
@@ -309,13 +332,13 @@
             try {
                 // 分割日志行
                 const lines = log.split('\n')
-                                 .map(line => line.trim())
-                                 .filter(line => line.length > 0);
-                
+                    .map(line => line.trim())
+                    .filter(line => line.length > 0);
+
                 // 提取SQL和参数
                 let sql = '';
                 let params = [];
-                
+
                 lines.forEach(line => {
                     if (line.includes('Preparing:')) {
                         sql += line.split('Preparing:')[1].trim() + ' ';
@@ -326,21 +349,27 @@
                         }
                     }
                 });
-                
+
                 if (!sql) {
                     throw new Error('未找到SQL语句');
                 }
-                
-                // 格式化原始SQL（带占位符）
-                const originalSqlHtml = formatSql(sql);
-                
-                // 生成参数替换后的SQL
+
+                // 格式化原始SQL（仅语法高亮，不美化）
+                const originalSqlHtml = formatSql(sql.trim());
+
+                // 生成并美化参数替换后的SQL
                 const replacedSqlText = replaceParamsInSql(sql, params);
-                const replacedSqlHtml = formatSql(replacedSqlText, false)
+                const beautifiedSql = beautifySql(replacedSqlText);
+
+                // 格式化美化后的SQL（带语法高亮）
+                const replacedSqlHtml = formatSql(beautifiedSql, false)
                     // 为替换的参数添加特殊样式
                     .replace(/('[^']*')/g, '<span class="sql-replaced">$1</span>')
-                    .replace(/(\b\d+\b)/g, '<span class="sql-replaced">$1</span>');
-                
+                    .replace(/(\b\d+(\.\d+)?\b)(?!<\/span>)/g, '<span class="sql-replaced">$1</span>')
+                    // 处理换行和缩进显示
+                    .replace(/\n/g, '<br>')
+                    .replace(/  /g, '&nbsp;&nbsp;');
+
                 // 格式化参数列表
                 let formattedParamsHtml = '';
                 if (params.length > 0) {
@@ -358,19 +387,19 @@
                 } else {
                     formattedParamsHtml = '<div class="text-gray-400">未找到参数信息</div>';
                 }
-                
+
                 // 显示结果
-                originalSql.innerHTML = originalSqlHtml;
+                originalSql.innerHTML = originalSqlHtml.replace(/\n/g, '<br>');
                 replacedSql.innerHTML = replacedSqlHtml;
                 formattedParams.innerHTML = formattedParamsHtml;
-                
+
                 initialMessage.classList.add('hidden');
                 errorMessage.classList.add('hidden');
                 formatResult.classList.remove('hidden');
-                
+
                 return {
-                    originalSql: sql,
-                    replacedSql: replacedSqlText
+                    originalSql: sql.trim(), // 返回原始未美化的SQL
+                    replacedSql: beautifiedSql // 返回美化后的SQL
                 };
             } catch (error) {
                 console.error('解析日志失败:', error);
@@ -383,14 +412,14 @@
 
         // 事件监听
         let formattedData = null;
-        
+
         formatBtn.addEventListener('click', () => {
             const log = logInput.value.trim();
             if (!log) {
                 showToast('请输入日志内容', false);
                 return;
             }
-            
+
             formattedData = parseAndFormatLog(log);
             if (formattedData) {
                 showToast('日志格式化成功');
@@ -414,17 +443,11 @@
                 showToast('没有可复制的内容', false);
                 return;
             }
-            
-            // 创建一个临时元素来复制文本
-            const tempElement = document.createElement('textarea');
-            tempElement.value = formattedData.originalSql;
-            
-            document.body.appendChild(tempElement);
-            tempElement.select();
-            document.execCommand('copy');
-            document.body.removeChild(tempElement);
-            
-            showToast('已复制原始SQL');
+            navigator.clipboard.writeText(formattedData.originalSql).then(() => {
+                showToast('已复制原始SQL');
+            }, () => {
+                showToast('复制失败', false);
+            });
         });
 
         copyReplacedSqlBtn.addEventListener('click', () => {
@@ -432,17 +455,11 @@
                 showToast('没有可复制的内容', false);
                 return;
             }
-            
-            // 创建一个临时元素来复制文本
-            const tempElement = document.createElement('textarea');
-            tempElement.value = formattedData.replacedSql;
-            
-            document.body.appendChild(tempElement);
-            tempElement.select();
-            document.execCommand('copy');
-            document.body.removeChild(tempElement);
-            
-            showToast('已复制参数替换后的SQL');
+            navigator.clipboard.writeText(formattedData.replacedSql).then(() => {
+                showToast('已复制参数替换后的SQL');
+            }, () => {
+                showToast('复制失败', false);
+            });
         });
 
         // 支持按Ctrl+Enter格式化
@@ -453,5 +470,5 @@
         });
     </script>
 </body>
+
 </html>
-    
