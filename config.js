@@ -188,6 +188,41 @@ const websiteConfig = {
       githubUrl: "https://github.com/123xiao/Cloudflare-SQL-to-API",
       liveUrl: "https://123406.xyz",
     },
+     {
+      title: "SQL to API 管理平台",
+      description: "基于Cloudflare Workers和D1数据库的SQL转API工具",
+      technologies: [],
+      githubUrl: "https://github.com/123xiao/Cloudflare-SQL-to-API",
+      liveUrl: "https://123406.xyz",
+    },
+     {
+      title: "MyBatis SQL日志格式化工具",
+      description: "粘贴MyBatis生成的SQL日志，一键格式化，支持参数替换，让SQL语句更清晰易读 Workers和D1数据库的SQL转API工具",
+      technologies: [],
+      githubUrl: "https://github.com/123xiao/geek-dev-personal-site",
+      liveUrl: "https://123408.xyz/mybatis",
+    },
+    {
+      title: "高级JSON对比工具",
+      description: "一款功能强大、操作便捷的JSON对比工具，支持完整对比和局部对比， 提供树形视图和文本视图两种查看方式，帮助开发者快速定位和分析JSON数据差异。",
+      technologies: [],
+      githubUrl: "https://github.com/123xiao/geek-dev-personal-site",
+      liveUrl: "https://123408.xyz/json",
+    },
+    {
+      title: "健身营养智能工具",
+      description: "专业减脂增肌计划生成工具",
+      technologies: [],
+      githubUrl: "https://github.com/123xiao/geek-dev-personal-site",
+      liveUrl: "https://123408.xyz/keep",
+    },
+    {
+      title: "逆向学习路线",
+      description: "",
+      technologies: [],
+      githubUrl: "",
+      liveUrl: "https://123408.xyz/study_plan",
+    },
   ],
 
   // 博客文章
