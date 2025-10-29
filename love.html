@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>爱的告白</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://gcore.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    
+    <!-- 配置Tailwind自定义颜色和字体 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        love: {
+                            light: '#FF9AAA',
+                            DEFAULT: '#FF4D6D',
+                            dark: '#C9184A',
+                        },
+                        romantic: {
+                            100: '#FFF0F3',
+                            200: '#FFD6E0',
+                            300: '#FFB7C5',
+                        }
+                    },
+                    fontFamily: {
+                        romantic: ['"Dancing Script"', 'cursive', 'sans-serif'],
+                        main: ['"Noto Sans SC"', 'sans-serif']
+                    },
+                }
+            }
+        }
+    </script>
+    
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .text-shadow {
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+            }
+            .heart-beat {
+                animation: heartbeat 1.5s ease-in-out infinite;
+            }
+            .float {
+                animation: float 6s ease-in-out infinite;
+            }
+            .fade-in {
+                animation: fadeIn 1.5s ease forwards;
+            }
+            .slide-up {
+                animation: slideUp 1.5s ease forwards;
+            }
+        }
+        
+        /* 导入字体 */
+        @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap');
+        
+        /* 背景渐变动画 */
+        body {
+            background: linear-gradient(135deg, #FFF0F3 0%, #FFD6E0 50%, #FFF0F3 100%);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            min-height: 100vh;
+        }
+        
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        @keyframes heartbeat {
+            0% { transform: scale(1); }
+            14% { transform: scale(1.1); }
+            28% { transform: scale(1); }
+            42% { transform: scale(1.1); }
+            70% { transform: scale(1); }
+        }
+        
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0px); }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideUp {
+            from { 
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* 爱心样式 */
+        .heart {
+            position: relative;
+            width: 50px;
+            height: 45px;
+            transform: rotate(-45deg);
+            animation: heartbeat 1.5s infinite;
+        }
+        
+        .heart:before,
+        .heart:after {
+            content: '';
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background-color: #FF4D6D;
+            border-radius: 50%;
+        }
+        
+        .heart:before {
+            top: -25px;
+            left: 0;
+        }
+        
+        .heart:after {
+            top: 0;
+            right: -25px;
+        }
+        
+        /* 随机爱心动画 */
+        .floating-heart {
+            position: absolute;
+            pointer-events: none;
+            animation: floatUp 4s ease-in-out forwards;
+        }
+        
+        @keyframes floatUp {
+            0% {
+                transform: translateY(0) rotate(0deg) scale(0.3);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100vh) rotate(720deg) scale(0.8);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body class="font-main text-gray-800 overflow-x-hidden">
+    <!-- 顶部装饰爱心 -->
+    <div class="absolute top-0 left-0 w-full overflow-hidden h-24 pointer-events-none">
+        <div class="heart absolute top-5 left-[10%]" style="animation-delay: 0s;"></div>
+        <div class="heart absolute top-8 left-[30%]" style="animation-delay: 0.5s; transform: rotate(-45deg) scale(0.7);"></div>
+        <div class="heart absolute top-3 left-[60%]" style="animation-delay: 1s; transform: rotate(-45deg) scale(0.5);"></div>
+        <div class="heart absolute top-10 left-[80%]" style="animation-delay: 1.5s; transform: rotate(-45deg) scale(0.6);"></div>
+    </div>
+
+    <div class="container mx-auto px-4 py-16 relative z-10">
+        <!-- 标题部分 -->
+        <header class="text-center mb-12 opacity-0 fade-in" style="animation-delay: 0.5s;">
+            <h1 class="text-[clamp(2.5rem,5vw,4rem)] font-romantic font-bold text-love-dark text-shadow">
+                致 <span id="recipient" class="text-love">你</span>
+            </h1>
+            <div class="w-32 h-1 bg-love mx-auto mt-4 rounded-full"></div>
+        </header>
+        
+        <!-- 主要内容区 -->
+        <main class="max-w-2xl mx-auto bg-white/70 backdrop-blur-sm rounded-2xl p-8 md:p-12 shadow-xl opacity-0 slide-up" style="animation-delay: 1s;">
+            <!-- 主爱心图片 -->
+            <div class="text-center mb-10">
+                <div class="inline-block heart-beat">
+                    <i class="fa fa-heart text-[clamp(3rem,8vw,5rem)] text-love"></i>
+                </div>
+            </div>
+            
+            <!-- 表白内容 -->
+            <div class="space-y-6 text-lg md:text-xl leading-relaxed">
+                <p>亲爱的 <span id="recipient2" class="font-bold text-love">你</span>：</p>
+                
+                <p>当我第一次见到你的时候，我的心跳就漏了一拍。你的笑容像阳光一样温暖，照亮了我的每一天。</p>
+                
+                <p>和你在一起的每一刻，无论是欢笑还是沉默，都让我感到无比的幸福和安心。我发现自己总是在不经意间想起你，期待着和你再次相见。</p>
+                
+                <p class="font-romantic text-2xl md:text-3xl text-center text-love my-6">
+                    我喜欢你，不止是一点点
+                </p>
+                
+                <p>我希望能牵着你的手，一起看日出日落，一起经历生活中的点点滴滴。无论未来有多少挑战，我都想和你一起面对。</p>
+                
+                <p>你愿意做我的另一半，让我们一起谱写属于我们的故事吗？</p>
+            </div>
+            
+            <!-- 互动按钮 -->
+            <div class="mt-12 flex flex-col sm:flex-row justify-center gap-4">
+                <button id="acceptBtn" class="px-8 py-3 bg-love text-white rounded-full text-lg font-medium shadow-lg hover:bg-love-dark transform transition hover:scale-105 focus:outline-none focus:ring-2 focus:ring-love-light focus:ring-offset-2">
+                    <i class="fa fa-heart mr-2"></i>我愿意
+                </button>
+                <button id="rejectBtn" class="px-8 py-3 bg-gray-200 text-gray-700 rounded-full text-lg font-medium shadow-lg hover:bg-gray-300 transform transition focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2">
+                    <i class="fa fa-times mr-2"></i>再考虑
+                </button>
+            </div>
+        </main>
+        
+        <!-- 底部信息 -->
+        <footer class="text-center mt-16 text-gray-600 opacity-0 fade-in" style="animation-delay: 1.5s;">
+            <p class="font-romantic text-xl">用我全部的爱 &hearts;</p>
+            
+        </footer>
+    </div>
+    
+    <!-- 浮动爱心容器 -->
+    <div id="hearts-container" class="fixed inset-0 pointer-events-none z-0"></div>
+    
+    <!-- 成功弹窗 -->
+    <div id="successModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-2xl p-8 max-w-md w-full mx-4 text-center transform transition-all scale-95 opacity-0" id="modalContent">
+            <div class="heart-beat mb-6">
+                <i class="fa fa-heart text-6xl text-love"></i>
+            </div>
+            <h2 class="text-2xl md:text-3xl font-romantic text-love-dark mb-4">太好了！</h2>
+            <p class="text-lg mb-6">我会永远珍惜 <span id="modalRecipient" class="font-bold text-love">你</span> 的心意！</p>
+            <button id="closeModal" class="px-6 py-2 bg-love text-white rounded-full font-medium hover:bg-love-dark transition">
+                确定
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // 获取URL参数中的名字
+        function getParameterByName(name) {
+            const url = window.location.href;
+            name = name.replace(/[\[\]]/g, '\\$&');
+            const regex = new RegExp(`[?&]${name}(=([^&#]*)|&|#|$)`);
+            const results = regex.exec(url);
+            if (!results) return null;
+            if (!results[2]) return '';
+            return decodeURIComponent(results[2].replace(/\+/g, ' '));
+        }
+        
+        // 设置表白对象
+        const recipientName = getParameterByName('name') || '小豆子';
+        document.getElementById('recipient').textContent = recipientName;
+        document.getElementById('recipient2').textContent = recipientName;
+        document.getElementById('modalRecipient').textContent = recipientName;
+        
+        // 随机生成爱心
+        function createHeart() {
+            const heartsContainer = document.getElementById('hearts-container');
+            const heart = document.createElement('div');
+            
+            // 随机属性
+            const size = Math.random() * 30 + 10;
+            const left = Math.random() * 100;
+            const delay = Math.random() * 5;
+            const duration = Math.random() * 5 + 5;
+            const opacity = Math.random() * 0.7 + 0.3;
+            
+            // 设置样式
+            heart.className = 'floating-heart';
+            heart.innerHTML = '<i class="fa fa-heart"></i>';
+            heart.style.cssText = `
+                left: ${left}%;
+                font-size: ${size}px;
+                color: #FF4D6D;
+                opacity: ${opacity};
+                animation-delay: ${delay}s;
+                animation-duration: ${duration}s;
+            `;
+            
+            heartsContainer.appendChild(heart);
+            
+            // 动画结束后移除元素
+            setTimeout(() => {
+                heart.remove();
+            }, duration * 1000);
+        }
+        
+        // 定时生成爱心
+        setInterval(createHeart, 500);
+        
+        // 按钮交互
+        const acceptBtn = document.getElementById('acceptBtn');
+        const rejectBtn = document.getElementById('rejectBtn');
+        const successModal = document.getElementById('successModal');
+        const modalContent = document.getElementById('modalContent');
+        const closeModal = document.getElementById('closeModal');
+        
+        // 接受按钮
+        acceptBtn.addEventListener('click', () => {
+            successModal.classList.remove('hidden');
+            // 触发动画
+            setTimeout(() => {
+                modalContent.classList.remove('scale-95', 'opacity-0');
+                modalContent.classList.add('scale-100', 'opacity-1');
+            }, 10);
+            
+            // 创建大量爱心庆祝
+            for (let i = 0; i < 30; i++) {
+                setTimeout(createHeart, i * 100);
+            }
+        });
+        
+        // 关闭弹窗
+        closeModal.addEventListener('click', () => {
+            modalContent.classList.remove('scale-100', 'opacity-1');
+            modalContent.classList.add('scale-95', 'opacity-0');
+            
+            setTimeout(() => {
+                successModal.classList.add('hidden');
+            }, 300);
+        });
+        
+        // 拒绝按钮 - 调皮的效果
+        rejectBtn.addEventListener('mouseover', () => {
+            const btnRect = rejectBtn.getBoundingClientRect();
+            const windowWidth = window.innerWidth;
+            const windowHeight = window.innerHeight;
+            
+            // 计算新位置，确保按钮在视窗内
+            const maxX = windowWidth - btnRect.width;
+            const maxY = windowHeight - btnRect.height;
+            
+            const newX = Math.random() * maxX;
+            const newY = Math.random() * maxY;
+            
+            rejectBtn.style.position = 'fixed';
+            rejectBtn.style.left = `${newX}px`;
+            rejectBtn.style.top = `${newY}px`;
+        });
+    </script>
+</body>
+</html>
+<script defer src="https://analytics.123408.xyz/tracker.min.js" data-website-id="123xiao-表白工具"></script>
