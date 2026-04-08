@@ -1,0 +1,193 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>KT泰坦资本角斗场 | 实时排名</title>
+    <meta
+      name="description"
+      content="用户资产实时增长与排名博弈单页，支持本地化存储与秒级刷新。"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Manrope:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="bg-aurora bg-aurora-a"></div>
+    <div class="bg-aurora bg-aurora-b"></div>
+    <div class="bg-grid"></div>
+
+    <main class="arena">
+      <header class="arena-head">
+        <div class="head-copy">
+          <p class="head-tag">WEALTH GAME ARENA</p>
+          <h1>KT泰坦资本角斗场</h1>
+          <p>
+            每秒更新资产排名，实时观察领先、追击与反超。全部数据仅保存在本地浏览器。
+          </p>
+        </div>
+
+        <div class="head-actions">
+          <button id="openModalBtn" class="btn btn-primary" type="button">新增玩家</button>
+          <button id="clearAllBtn" class="btn btn-danger" type="button">清空全部</button>
+          <div class="time-chip">
+            <span>系统时钟</span>
+            <strong id="nowTime">--:--:--</strong>
+          </div>
+        </div>
+      </header>
+
+      <section class="leaderboard-shell">
+        <div class="board-head">
+          <h2>实时排名</h2>
+          <p id="userCount">0 位玩家</p>
+        </div>
+
+        <section id="topThreePanel" class="top-three-panel" hidden>
+          <article class="top-three-card top-rank-2" data-rank="2">
+            <span class="top-rank-icon" aria-hidden="true">♛</span>
+            <p class="top-rank-label">TOP 2</p>
+            <h3 class="top-player-name">虚位待定</h3>
+            <strong class="top-player-asset">--</strong>
+            <p class="top-player-speed">--</p>
+            <p class="top-player-gap">--</p>
+          </article>
+
+          <article class="top-three-card top-rank-1" data-rank="1">
+            <span class="top-rank-icon" aria-hidden="true">👑</span>
+            <p class="top-rank-label">TOP 1</p>
+            <h3 class="top-player-name">虚位待定</h3>
+            <strong class="top-player-asset">--</strong>
+            <p class="top-player-speed">--</p>
+            <p class="top-player-gap">--</p>
+          </article>
+
+          <article class="top-three-card top-rank-3" data-rank="3">
+            <span class="top-rank-icon" aria-hidden="true">♜</span>
+            <p class="top-rank-label">TOP 3</p>
+            <h3 class="top-player-name">虚位待定</h3>
+            <strong class="top-player-asset">--</strong>
+            <p class="top-player-speed">--</p>
+            <p class="top-player-gap">--</p>
+          </article>
+        </section>
+
+        <div class="board-columns" aria-hidden="true">
+          <span>名次</span>
+          <span>玩家</span>
+          <span>当前资产</span>
+          <span>增速</span>
+          <span>累计增长</span>
+          <span>博弈差距</span>
+          <span>操作</span>
+        </div>
+
+        <div id="emptyState" class="empty-state" hidden>
+          <h3>角斗场尚未开局</h3>
+          <p>点击右上角「新增玩家」后立即开始排名。</p>
+          <button id="openModalFromEmpty" class="btn btn-primary" type="button">立即添加</button>
+        </div>
+
+        <ul id="leaderboardList" class="leaderboard-list"></ul>
+      </section>
+    </main>
+
+    <template id="leaderRowTemplate">
+      <li class="leader-row">
+        <div class="cell rank-cell">
+          <span class="rank-no"></span>
+          <span class="rank-icon" aria-hidden="true"></span>
+          <span class="rank-badge"></span>
+        </div>
+
+        <div class="cell player-cell">
+          <h3 class="player-name"></h3>
+          <p class="player-meta"></p>
+        </div>
+
+        <div class="cell value-cell">
+          <strong class="asset-value"></strong>
+        </div>
+
+        <div class="cell speed-cell">
+          <strong class="hourly-value"></strong>
+          <span class="secondly-value"></span>
+        </div>
+
+        <div class="cell value-cell">
+          <strong class="growth-value"></strong>
+        </div>
+
+        <div class="cell value-cell">
+          <span class="gap-label"></span>
+          <strong class="gap-value"></strong>
+        </div>
+
+        <div class="cell action-cell">
+          <button class="remove-btn" type="button">移除</button>
+        </div>
+      </li>
+    </template>
+
+    <div id="userModal" class="modal" hidden>
+      <div class="modal-mask" data-close-modal></div>
+      <section class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <button id="closeModalBtn" class="modal-close" type="button" aria-label="关闭">×</button>
+        <h2 id="modalTitle">新增资产玩家</h2>
+        <p class="modal-tip">输入玩家名称、时薪和初始资产后，自动加入实时博弈排名。</p>
+
+        <form id="userForm" class="modal-form" novalidate>
+          <label>
+            玩家名称
+            <input
+              type="text"
+              id="nameInput"
+              name="name"
+              maxlength="24"
+              placeholder="例如：Alice"
+              required
+            />
+          </label>
+
+          <label>
+            时薪（¥/小时）
+            <input
+              type="number"
+              id="hourlyInput"
+              name="hourly"
+              inputmode="decimal"
+              step="0.01"
+              min="0"
+              placeholder="例如：188.88"
+              required
+            />
+          </label>
+
+          <label>
+            初始资产（¥）
+            <input
+              type="number"
+              id="initialInput"
+              name="initial"
+              inputmode="decimal"
+              step="0.01"
+              min="0"
+              placeholder="例如：500000"
+              required
+            />
+          </label>
+
+          <div id="formError" class="form-error" role="status" aria-live="polite"></div>
+
+          <button type="submit" class="btn btn-primary">确认入场</button>
+        </form>
+      </section>
+    </div>
+
+    <script src="./app.js" defer></script>
+  </body>
+</html>
